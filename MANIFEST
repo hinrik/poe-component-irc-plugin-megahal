@@ -1,0 +1,7 @@
+Makefile.PL
+MANIFEST
+INSTALL
+Changes
+lib/POE/Component/IRC/Plugin/MegaHAL.pm
+t/01_compile.t
+t/99_pod.t
