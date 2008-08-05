@@ -2,6 +2,7 @@ package POE::Component::IRC::Plugin::MegaHAL;
 
 use strict;
 use warnings;
+use Carp;
 use POE;
 use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array);
@@ -137,6 +138,8 @@ sub brain {
 
 sub transplant {
     my ($self, $brain) = @_;
+    
+    croak 'Argument must be a POE::Component::AI::MegaHAL instance' if ref $brain ne 'POE::Component::AI::MegaHAL';
     my $old_brain = $self->{MegaHAL};
     $poe_kernel->post($self->{MegaHAL}->session_id(), 'shutdown') unless $self->{keep_alive};
     $self->{MegaHAL} = $brain;

@@ -1,5 +1,6 @@
 0.03  
     - Removed some duplicate code
+    - Added some error checking to transplant method
 
 0.02  Tue Aug  5 02:13:14 GMT 2008
     - Minor pod updates
