@@ -8,7 +8,7 @@ use POE::Component::IRC::Common qw(l_irc matches_mask_array);
 use POE::Component::IRC::Plugin qw(:ALL);
 use POE::Component::IRC::Plugin::BotAddressed;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub new {
     my ($package, %args) = @_;
@@ -59,6 +59,7 @@ sub PCI_register {
 sub PCI_unregister {
     my ($self, $irc) = @_;
 
+    $irc->yield(part => $self->{Own_channel}) if $self->{Own_channel};
     delete $self->{irc};
     $poe_kernel->post($self->{MegaHAL}->session_id() => 'shutdown') unless $self->{keep_alive};
     delete $self->{MegaHAL};
@@ -244,7 +245,7 @@ or a subclass thereof. It also requires a L<POE::Component::IRC::Plugin::BotAddr
 to be in the plugin pipeline. It will be added automatically if it is not
 present.
 
-=head2 METHODS
+=head1 METHODS
 
 =head2 C<new>
 
@@ -260,12 +261,13 @@ of a new L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> object.
 
 'Own_channel', a channel where it will reply to all messages. It will try to
 join this channel if the IRC component is not already on it. It will also
-part from that channel when the plugin is removed. Defaults to none.
+part from it when the plugin is removed from the pipeline. Defaults to none.
 
 'Flood_interval', default is 60 (seconds), which means that user X in
 channel Y has to wait that long before addressing the bot in the same channel
 if he doesn't want to be ignored. The channel set with the 'Own_channel'
-option (if any) is exempt from this.
+option (if any) is exempt from this. Setting this to 0 effectively turns off
+flood protection.
 
 'Ignore', an array reference of IRC masks (e.g. "purl!*@*") to ignore.
 
