@@ -4,19 +4,28 @@ use strict;
 use warnings;
 use POE;
 use POE::Component::AI::MegaHAL;
-use POE::Component::IRC::Common qw(l_irc);
+use POE::Component::IRC::Common qw(l_irc matches_mask_array);
 use POE::Component::IRC::Plugin qw(:ALL);
 use POE::Component::IRC::Plugin::BotAddressed;
 
 our $VERSION = '0.01';
 
 sub new {
-    my $package = shift;
-    my $self = bless { @_ }, $package;
+    my ($package, %args) = @_;
+    my $self = bless \%args, $package;
 
-    if (ref $self->{MegaHAL} ne 'POE::Component::AI::MegaHAL') {
-        $self->{MegaHAL} = POE::Component::AI::MegaHAL->spawn(( $self->{MegaHAL_args} ? %{ $self->{MegaHAL_args} } : () ));
+    if (ref $self->{MegaHAL} eq 'POE::Component::AI::MegaHAL') {
+        $self->{keep_alive} = 1;
     }
+    else {
+        $self->{MegaHAL} = POE::Component::AI::MegaHAL->spawn(
+            ($self->{MegaHAL_args} ? %{ $self->{MegaHAL_args} } : () ),
+        );
+    }
+
+    $self->{Method} = 'notice' if !defined $self->{Method} || $self->{Method} !~ /privmsg|notice/;
+    $self->{flooders} = { };
+    $self->{Flood_interval} = 60 if !defined $self->{Flood_interval};
 
     return $self;
 }
@@ -25,15 +34,15 @@ sub PCI_register {
     my ($self, $irc) = @_;
 
     if (!$irc->isa('POE::Component::IRC::State')) {
-        die __PACKAGE__ . ' requires PoCo::IRC::State or a subclass thereof';
+        die __PACKAGE__ . " requires PoCo::IRC::State or a subclass thereof\n";
     }
-    
+
     $self->{irc} = $irc;
-    $self->{session_id} = POE::Session->create(
+    POE::Session->create(
         object_states => [
-            $self => [qw(_start _reply _repost)],
+            $self => [qw(_start _reply _own_handler _other_handler)],
         ],
-    )->ID();
+    );
 
     if (!grep { $_->isa('POE::Component::IRC::Plugin::BotAddressed') } values %{ $irc->plugin_list() }) {
         $irc->plugin_add('BotAddressed', POE::Component::IRC::Plugin::BotAddressed->new());
@@ -43,7 +52,7 @@ sub PCI_register {
         $irc->yield(join => $self->{Own_channel});
     }
 
-    $irc->plugin_register($self, 'SERVER', qw(001 bot_addressed ctcp_action msg public));
+    $irc->plugin_register($self, 'SERVER', qw(001 bot_addressed bot_mentioned bot_mentioned_action ctcp_action public));
     return 1;
 }
 
@@ -51,31 +60,87 @@ sub PCI_unregister {
     my ($self, $irc) = @_;
 
     delete $self->{irc};
+    $poe_kernel->post($self->{MegaHAL}->session_id() => 'shutdown') unless $self->{keep_alive};
+    delete $self->{MegaHAL};
     $poe_kernel->refcount_decrement($self->{session_id}, __PACKAGE__);
     return 1;
 }
 
 sub _start {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my ($kernel, $self, $session) = @_[KERNEL, OBJECT, SESSION];
+    $self->{session_id} = $session->ID();
+    $kernel->refcount_increment($self->{session_id}, __PACKAGE__);
     return;
 }
 
 sub _reply {
-    my $irc = $_[OBJECT]->{irc};
+    my ($self) = $_[OBJECT];
     my $info = $_[ARG0];
-    $irc->yield(privmsg => $info->{_target}, $info->{reply});
-    return;
-}
-
-# a trick to make do_reply() and such be called from *our* POE session
-sub _repost {
-    $_[ARG0]->($_[OBJECT]);
+    $self->{irc}->yield($self->{Method} => $info->{_target}, $info->{reply});
     return;
 }
 
 sub _ignoring {
-    my ($self, $mask) = @_;
+    my ($self, $user, $chan) = @_;
+    
+    return if !$self->{Ignore};
+    my $mapping = $self->{irc}->isupport('CASEMAPPING');
+    return 1 if keys %{ matches_mask_array($self->{Ignore}, [$user], $mapping) };
     return;
+}
+
+sub _own_handler {
+    my ($self, $user, $chan, $what) = @_[OBJECT, ARG0..$#_];
+    
+    return if $self->_ignoring($user);
+
+    my $event = '_no_reply';
+    if ($self->{Own_channel} && l_irc($self->{Own_channel}) eq l_irc($chan)) {
+        $event = '_reply';
+    }
+
+    $poe_kernel->post($self->{MegaHAL}->session_id() => do_reply => {
+        event   => $event,
+        text    => $what,
+        _target => $chan,
+    });
+
+    return;
+}
+
+sub _other_handler {
+    my ($self, $user, $chan, $what) = @_[OBJECT, ARG0..$#_];
+
+    return if $self->_ignoring($user);
+    return if $self->{Own_channel} && (l_irc($chan) eq l_irc($self->{Own_channel}));
+    
+    # flood protection
+    my $key = "$user $chan";
+    my $last  = delete $self->{flooders}->{$key};
+    $self->{flooders}->{$key} = time;
+    return if $last && (time - $last < $self->{Flood_interval});
+
+    $poe_kernel->post($self->{MegaHAL}->session_id() => do_reply => {
+        event   => '_reply',
+        text    => $what,
+        _target => $chan,
+    });
+    
+    return;
+}
+
+sub brain {
+    my ($self) = @_;
+    return $self->{MegaHAL};
+}
+
+sub transplant {
+    my ($self, $brain) = @_;
+    my $old_brain = $self->{MegaHAL};
+    $poe_kernel->post($self->{MegaHAL}->session_id(), 'shutdown') unless $self->{keep_alive};
+    $self->{MegaHAL} = $brain;
+    $self->{keep_alive} = 1;
+    return $old_brain;
 }
 
 sub S_001 {
@@ -86,72 +151,52 @@ sub S_001 {
 
 sub S_bot_addressed {
     my ($self, $irc) = splice @_, 0, 2;
-    my $nick = (split /!/, ${ $_[0] })[0];
-    my $chan = ${ $_[1] }->[0];
-    my $what = ${ $_[2] };
+    my $user         = ${ $_[0] };
+    my $chan         = ${ $_[1] }->[0];
+    my $what         = ${ $_[2] };
 
-    return if $self->{Own_channel} && l_irc($chan) eq l_irc($self->{Own_channel});
-    return if $self->{Channels} && !grep { l_irc($_) eq l_irc($chan) } @{ $self->{Channels} };
-    #return if ignore
+    $poe_kernel->post($self->{session_id} => _other_handler => $user, $chan, $what);
+    return PCI_EAT_NONE;
+}
+
+sub S_bot_mentioned {
+    my ($self, $irc) = splice @_, 0, 2;
+    my $user         = ${ $_[0] };
+    my $chan         = ${ $_[1] }->[0];
+    my $what         = ${ $_[2] };
     
-    $poe_kernel->post($self->{session_id} => _repost => sub {
-        my ($self) = @_;
-        $poe_kernel->post($self->{MegaHAL}->session_id() => do_reply => {
-            event   => '_reply',
-            text    => $what,
-            _target => $chan,
-        });
-    });
+    $poe_kernel->post($self->{session_id} => _other_handler => $user, $chan, $what);
+    return PCI_EAT_NONE;
+}
 
+sub S_bot_mentioned_action {
+    my ($self, $irc) = splice @_, 0, 2;
+    my $user         = ${ $_[0] };
+    my $chan         = ${ $_[1] }->[0];
+    my $what         = ${ $_[2] };
+    
+    $poe_kernel->post($self->{session_id} => _other_handler => $user, $chan, $what);
     return PCI_EAT_NONE;
 }
 
 sub S_ctcp_action {
     my ($self, $irc) = splice @_, 0, 2;
-    my $who       = ( split /!/, ${ $_[0] } )[0];
-    my $addressed = ${ $_[1] }->[0];
-    my $what      = ${ $_[2] };
+    my $user         = ${ $_[0] };
+    my $chan         = ${ $_[1] }->[0];
+    my $what         = ${ $_[2] };
 
-    # learn if
-    # return if
-
-    $poe_kernel->post($self->{session_id} => _repost => sub {
-        my ($self) = @_;
-        $poe_kernel->post($self->{MegaHAL}->session_id() => do_reply => {
-            event   => '_reply',
-            text    => $what,
-            _target => $addressed,
-        });
-    });
-
-
-    return PCI_EAT_NONE;
-}
-
-sub S_msg {
-    my ($self, $irc) = splice @_, 0, 2;
+    return PCI_EAT_NONE if $chan !~ /^[#&!]/;
+    $poe_kernel->post($self->{session_id} => _other_handler => $user, $chan, $what);
     return PCI_EAT_NONE;
 }
 
 sub S_public {
     my ($self, $irc) = splice @_, 0, 2;
-    my $nick = ( split /!/, ${ $_[0] } )[0];
-    my $chan = ${ $_[1] }->[0];
-    my $what = ${ $_[2] };
-    
-    return if !$self->{Own_channel};
-    return if l_irc($chan) ne l_irc($self->{Own_channel});
-    # return if ignore
-    
-    $poe_kernel->post($self->{session_id} => _repost => sub {
-        my ($self) = @_;
-        $poe_kernel->post($self->{MegaHAL}->session_id() => do_reply => {
-            event   => '_reply',
-            text    => $what,
-            _target => $chan,
-        });
-    });
+    my $user         = ${ $_[0] };
+    my $chan         = ${ $_[1] }->[0];
+    my $what         = ${ $_[2] };
 
+    $poe_kernel->post($self->{session_id} => _own_handler => $user, $chan, $what);
     return PCI_EAT_NONE;
 }
 
@@ -165,17 +210,29 @@ instance of L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL>.
 
 =head1 SYNOPSIS
 
+ #!/usr/bin/env perl
+ 
+ use strict;
+ use warnings;
+ use POE;
+ use POE::Component::IRC::Plugin::AutoJoin;
+ use POE::Component::IRC::Plugin::Connector;
  use POE::Component::IRC::Plugin::MegaHAL;
+ use POE::Component::IRC::State;
+ 
+ my $irc = POE::Component::IRC::State->spawn(
+     nick     => 'Brainy',
+     server   => 'irc.freenode.net',
+ );
+ 
+ my @channels = ('#other_chan', '#my_chan');
+ 
+ $irc->plugin_add('MegaHAL', POE::Component::IRC::Plugin::MegaHAL->new(Own_channel => '#my_chan'));
+ $irc->plugin_add('AutoJoin', POE::Component::IRC::Plugin::AutoJoin->new(Channels => \@channels));
+ $irc->plugin_add('Connector', POE::Component::IRC::Plugin::Connector->new());
+ $irc->yield('connect');
 
- $irc->plugin_add('MegaHAL', POE::Component::IRC::Plugin::MegaHAL(
-     MegaHAL_args => {
-         path     => '/my/brain.brn',
-         autosave => 1,
-     },
-     Channels     => ['#here', '#there'],
-     Own_channel  => '#the_brain',
-     Ignore       => ['purl!*@*'],
- ));
+ $poe_kernel->run();
 
 =head1 DESCRIPTION
 
@@ -201,20 +258,41 @@ If this argument is not provided, the plugin will construct its own object.
 'MegaHAL_args', a hash reference containing arguments to pass to the constructor
 of a new L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> object.
 
-'Channels', the channels where it will reply to people upon being addressed
-Defaults to all the channels which the IRC component is on.
-
 'Own_channel', a channel where it will reply to all messages. It will try to
 join this channel if the IRC component is not already on it. It will also
 part from that channel when the plugin is removed. Defaults to none.
 
+'Flood_interval', default is 60 (seconds), which means that user X in
+channel Y has to wait that long before addressing the bot in the same channel
+if he doesn't want to be ignored. The channel set with the 'Own_channel'
+option (if any) is exempt from this.
+
 'Ignore', an array reference of IRC masks (e.g. "purl!*@*") to ignore.
+
+'Method', how you want messages to be delivered. Valid options are 'notice'
+(the default) and 'privmsg'.
 
 Returns a plugin object suitable for feeding to
 L<POE::Component::IRC|POE::Component::IRC>'s plugin_add() method.
 
+=head2 C<brain>
+
+Takes no arguments. Returns the underlying
+L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> object being used
+by the plugin.
+
+=head2 C<transplant>
+
+Replaces the brain with the supplied
+L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> instance. Shuts
+down the old brain if it was instantiated by the plugin itself.
+
 =head1 AUTHOR
 
 Hinrik E<Ouml>rn SigurE<eth>sson, hinrik.sig@gmail.com
+
+=head1 KUDOS
+
+Those go to Chris C<BinGOs> Williams and his friend GumbyBRAIN.
 
 =cut

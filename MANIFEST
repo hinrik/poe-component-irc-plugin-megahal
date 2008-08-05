@@ -4,4 +4,6 @@ INSTALL
 Changes
 lib/POE/Component/IRC/Plugin/MegaHAL.pm
 t/01_compile.t
+t/02_load.t
 t/99_pod.t
+t/megahal.trn

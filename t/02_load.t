@@ -2,10 +2,10 @@ use strict;
 use warnings;
 use Test::More tests => 3;
 use POE;
-use POE::Component::IRC;
+use POE::Component::IRC::State;
 use POE::Component::IRC::Plugin::MegaHAL;
 
-my $irc = POE::Component::IRC->spawn( plugin_debug => 1 );
+my $irc = POE::Component::IRC::State->spawn( plugin_debug => 1, );
 
 POE::Session->create(
     package_states => [
@@ -18,10 +18,14 @@ $poe_kernel->run();
 sub _start {
     $irc->yield(register => 'all');
 
-    my $plugin = POE::Component::IRC::Plugin::MegaHAL->new();
+    my $plugin = POE::Component::IRC::Plugin::MegaHAL->new(
+        MegaHAL_args => {
+            Path => 't'
+        }
+    );
     isa_ok($plugin, 'POE::Component::IRC::Plugin::MegaHAL');
-  
-    if (!$irc->plugin_add('TestPlugin', $plugin )) {
+
+    if (!$irc->plugin_add('TestPlugin', $plugin)) {
         fail('plugin_add failed');
         $irc->yield('shutdown');
     }
