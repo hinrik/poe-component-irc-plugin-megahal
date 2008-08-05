@@ -251,7 +251,7 @@ present.
 
 Takes the following optional arguments:
 
-'MegaHAL', reference to an existing
+'MegaHAL', a reference to an existing
 L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> object you have
 lying around. Useful if you want to use it with multiple IRC components.
 If this argument is not provided, the plugin will construct its own object.
