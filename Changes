@@ -1,3 +1,7 @@
+0.06
+    - Strip color/formatting from text before giving it to MegaHAL
+    - Greet people who join our own channel
+
 0.05  Tue Aug  5 19:31:42 GMT 2008
     - Don't respond to every CTCP ACTION (except in own channel)
 

@@ -5,11 +5,11 @@ use warnings;
 use Carp;
 use POE;
 use POE::Component::AI::MegaHAL;
-use POE::Component::IRC::Common qw(l_irc matches_mask_array);
+use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 use POE::Component::IRC::Plugin::BotAddressed;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub new {
     my ($package, %args) = @_;
@@ -41,7 +41,7 @@ sub PCI_register {
     $self->{irc} = $irc;
     POE::Session->create(
         object_states => [
-            $self => [qw(_start _reply _own_handler _other_handler)],
+            $self => [qw(_start _megahal_reply _megahal_greeting _greet_handler _own_handler _other_handler)],
         ],
     );
 
@@ -53,7 +53,7 @@ sub PCI_register {
         $irc->yield(join => $self->{Own_channel});
     }
 
-    $irc->plugin_register($self, 'SERVER', qw(001 bot_addressed bot_mentioned bot_mentioned_action ctcp_action public));
+    $irc->plugin_register($self, 'SERVER', qw(001 bot_addressed bot_mentioned bot_mentioned_action ctcp_action join public));
     return 1;
 }
 
@@ -75,10 +75,16 @@ sub _start {
     return;
 }
 
-sub _reply {
-    my ($self) = $_[OBJECT];
-    my $info = $_[ARG0];
+sub _megahal_reply {
+    my ($self, $info) = @_[OBJECT, ARG0];
     $self->{irc}->yield($self->{Method} => $info->{_target}, $info->{reply});
+    return;
+}
+
+sub _megahal_greeting {
+    my ($self, $info) = @_[OBJECT, ARG0];
+    my $reply = "$info->{_nick}: $info->{reply}";
+    $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
     return;
 }
 
@@ -92,16 +98,19 @@ sub _ignoring {
 }
 
 sub _own_handler {
-    my ($self, $user, $chan, $what) = @_[OBJECT, ARG0..$#_];
+    my ($self, $kernel, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
     
     return if $self->_ignoring($user);
 
-    my $event = '_no_reply';
+    my $event = '_blank';
     if ($self->{Own_channel} && l_irc($self->{Own_channel}) eq l_irc($chan)) {
-        $event = '_reply';
+        $event = '_megahal_reply';
     }
 
-    $poe_kernel->post($self->{MegaHAL}->session_id() => do_reply => {
+    $what = strip_color($what);
+    $what = strip_formatting($what);
+    
+    $kernel->post($self->{MegaHAL}->session_id() => do_reply => {
         event   => $event,
         text    => $what,
         _target => $chan,
@@ -111,7 +120,7 @@ sub _own_handler {
 }
 
 sub _other_handler {
-    my ($self, $user, $chan, $what) = @_[OBJECT, ARG0..$#_];
+    my ($self, $kernel, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
 
     return if $self->_ignoring($user);
     return if $self->{Own_channel} && (l_irc($chan) eq l_irc($self->{Own_channel}));
@@ -121,13 +130,30 @@ sub _other_handler {
     my $last  = delete $self->{flooders}->{$key};
     $self->{flooders}->{$key} = time;
     return if $last && (time - $last < $self->{Flood_interval});
+    
+    $what = strip_color($what);
+    $what = strip_formatting($what);
 
-    $poe_kernel->post($self->{MegaHAL}->session_id() => do_reply => {
-        event   => '_reply',
+    $kernel->post($self->{MegaHAL}->session_id() => do_reply => {
+        event   => '_megahal_reply',
         text    => $what,
         _target => $chan,
     });
     
+    return;
+}
+
+sub _greet_handler {
+    my ($self, $kernel, $user, $chan) = @_[OBJECT, KERNEL, ARG0, ARG1];
+
+    return if $self->_ignoring($user);
+    return if !$self->{Own_channel} || (l_irc($chan) ne l_irc($self->{Own_channel}));
+
+    $kernel->post($self->{MegaHAL}->session_id() => initial_greeting => {
+        event   => '_megahal_greeting',
+        _target => $chan,
+        _nick   => (split /!/, $user)[0],
+    });
     return;
 }
 
@@ -174,6 +200,17 @@ sub S_bot_addressed {
     return PCI_EAT_NONE;
 }
 
+sub S_join {
+    my ($self, $irc) = splice @_, 0, 2;
+    my $user         = ${ $_[0] };
+    my $chan         = ${ $_[1] };
+
+
+    return PCI_EAT_NONE if (split /!/, $user)[0] eq $irc->nick_name();
+    $poe_kernel->post($self->{session_id} => _greet_handler => $user, $chan);
+    return PCI_EAT_NONE;
+}
+
 no warnings 'once';
 *S_public               = \&S_ctcp_action;
 *S_bot_mentioned        = \&S_bot_addressed;
@@ -184,8 +221,8 @@ __END__
 
 =head1 NAME
 
-POE::Component::IRC::Plugin::MegaHAL - A PoCo-IRC plugin which wraps an
-instance of L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL>.
+POE::Component::IRC::Plugin::MegaHAL - A PoCo-IRC plugin which provides
+access to a MegaHAL conversation simulator.
 
 =head1 SYNOPSIS
 
@@ -216,7 +253,9 @@ instance of L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL>.
 =head1 DESCRIPTION
 
 POE::Component::IRC::Plugin::MegaHAL is a L<POE::Component::IRC|POE::Component::IRC>
-plugin.
+plugin. It provides "intelligence" through the use of
+L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHal>.
+It will respond when people either mention your nickname or address you.
 
 This plugin requires the IRC component to be L<POE::Component::IRC::State|POE::Component::IRC::State>
 or a subclass thereof. It also requires a L<POE::Component::IRC::Plugin::BotAddressed|POE::Component::IRC::Plugin::BotAddressed>
