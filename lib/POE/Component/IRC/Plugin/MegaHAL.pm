@@ -7,9 +7,8 @@ use POE;
 use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
-use POE::Component::IRC::Plugin::BotAddressed;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 sub new {
     my ($package, %args) = @_;
@@ -41,19 +40,15 @@ sub PCI_register {
     $self->{irc} = $irc;
     POE::Session->create(
         object_states => [
-            $self => [qw(_start _megahal_reply _megahal_greeting _greet_handler _own_handler _other_handler)],
+            $self => [qw(_start _megahal_reply _megahal_greeting _greet_handler _msg_handler)],
         ],
     );
-
-    if (!grep { $_->isa('POE::Component::IRC::Plugin::BotAddressed') } values %{ $irc->plugin_list() }) {
-        $irc->plugin_add('BotAddressed', POE::Component::IRC::Plugin::BotAddressed->new());
-    }
 
     if ($self->{Own_channel} && !$irc->is_channel_member($irc->nick_name())) {
         $irc->yield(join => $self->{Own_channel});
     }
 
-    $irc->plugin_register($self, 'SERVER', qw(001 bot_addressed bot_mentioned bot_mentioned_action ctcp_action join public));
+    $irc->plugin_register($self, 'SERVER', qw(001 ctcp_action join public));
     return 1;
 }
 
@@ -91,58 +86,48 @@ sub _megahal_greeting {
 sub _ignoring {
     my ($self, $user, $chan) = @_;
     
-    return if !$self->{Ignore};
-    my $mapping = $self->{irc}->isupport('CASEMAPPING');
-    return 1 if keys %{ matches_mask_array($self->{Ignore}, [$user], $mapping) };
-    return;
-}
-
-sub _own_handler {
-    my ($self, $kernel, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
-    
-    return if $self->_ignoring($user);
-    return if !$self->{Own_channel} || l_irc($self->{Own_channel}) ne l_irc($chan);
-
-    $what = strip_color($what);
-    $what = strip_formatting($what);
-    
-    $kernel->post($self->{MegaHAL}->session_id() => do_reply => {
-        event   => '_megahal_reply',
-        text    => $what,
-        _target => $chan,
-    });
-
-    return;
-}
-
-sub _other_handler {
-    my ($self, $kernel, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
-
-    return if $self->_ignoring($user);
-    return if $self->{Own_channel} && (l_irc($chan) eq l_irc($self->{Own_channel}));
+    if ($self->{Ignore}) {
+        my $mapping = $self->{irc}->isupport('CASEMAPPING');
+        return 1 if keys %{ matches_mask_array($self->{Ignore}, [$user], $mapping) };
+    }
     
     # flood protection
     my $key = "$user $chan";
     my $last  = delete $self->{flooders}->{$key};
     $self->{flooders}->{$key} = time;
-    return if $last && (time - $last < $self->{Flood_interval});
+    return 1 if $last && (time - $last < $self->{Flood_interval});
     
+    return;
+}
+
+sub _msg_handler {
+    my ($self, $kernel, $type, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
+
+    return if $self->_ignoring($user, $chan);
     $what = strip_color($what);
     $what = strip_formatting($what);
 
+    my $event = '_no_reply';
+    my $nick = $self->{irc}->nick_name();
+    if ($self->{Own_channel} && (l_irc($chan) eq l_irc($self->{Own_channel}))
+        || $type eq 'action' && $what =~ /$nick/i
+        || $type eq 'public' && $what =~ s/^\s*\Q$nick\E[:,;.!?]?\s*(.*)$/$1/i)
+    {
+        $event = '_megahal_reply';
+    }
+
     $kernel->post($self->{MegaHAL}->session_id() => do_reply => {
-        event   => '_megahal_reply',
+        event   => $event,
         text    => $what,
         _target => $chan,
     });
-    
-    return;
+
 }
 
 sub _greet_handler {
     my ($self, $kernel, $user, $chan) = @_[OBJECT, KERNEL, ARG0, ARG1];
 
-    return if $self->_ignoring($user);
+    return if $self->_ignoring($user, $chan);
     return if !$self->{Own_channel} || (l_irc($chan) ne l_irc($self->{Own_channel}));
 
     $kernel->post($self->{MegaHAL}->session_id() => initial_greeting => {
@@ -182,17 +167,17 @@ sub S_ctcp_action {
     my $what         = ${ $_[2] };
 
     return PCI_EAT_NONE if $chan !~ /^[#&!]/;
-    $poe_kernel->post($self->{session_id} => _own_handler => $user, $chan, $what);
+    $poe_kernel->post($self->{session_id} => _msg_handler => 'action', $user, $chan, $what);
     return PCI_EAT_NONE;
 }
 
-sub S_bot_addressed {
+sub S_public {
     my ($self, $irc) = splice @_, 0, 2;
     my $user         = ${ $_[0] };
     my $chan         = ${ $_[1] }->[0];
     my $what         = ${ $_[2] };
 
-    $poe_kernel->post($self->{session_id} => _other_handler => $user, $chan, $what);
+    $poe_kernel->post($self->{session_id} => _msg_handler => 'public', $user, $chan, $what);
     return PCI_EAT_NONE;
 }
 
@@ -205,11 +190,6 @@ sub S_join {
     $poe_kernel->post($self->{session_id} => _greet_handler => $user, $chan);
     return PCI_EAT_NONE;
 }
-
-no warnings 'once';
-*S_public               = \&S_ctcp_action;
-*S_bot_mentioned        = \&S_bot_addressed;
-*S_bot_mentioned_action = \&S_bot_addressed;
 
 1;
 __END__
@@ -278,8 +258,7 @@ the pipeline. Defaults to none.
 
 'Flood_interval', default is 60 (seconds), which means that user X in
 channel Y has to wait that long before addressing the bot in the same channel
-if he doesn't want to be ignored. The channel set with the 'Own_channel'
-option (if any) is exempt from this. Setting this to 0 effectively turns off
+if he doesn't want to be ignored. Setting this to 0 effectively turns off
 flood protection.
 
 'Ignore', an array reference of IRC masks (e.g. "purl!*@*") to ignore.
