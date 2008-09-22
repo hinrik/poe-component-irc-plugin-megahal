@@ -1,3 +1,7 @@
+0.08  
+    - Refactor internals, get rid of a bug caused by previous bugfix
+    - Make flood protection affect the private channel as well
+
 0.07  Mon Sep 22 16:36:27 GMT 2008
     - Fixed bug which caused it to learn things twice
 
