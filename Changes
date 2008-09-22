@@ -1,3 +1,6 @@
+0.07
+    - Fixed bug which caused it to learn things twice
+
 0.06  Sat Aug  9 06:30:32 GMT 2008
     - Strip color/formatting from text before giving it to MegaHAL
     - Greet people who join our own channel
