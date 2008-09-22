@@ -1,3 +1,6 @@
+0.10  Mon Sep 22 20:33:18 GMT 2008
+    - Fix a serious typo. Sigh.
+
 0.09  Mon Sep 22 20:23:34 GMT 2008
     - It wasn't responding to its name was mentioned. Fixed that.
 

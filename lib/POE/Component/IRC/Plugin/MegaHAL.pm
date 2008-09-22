@@ -8,7 +8,7 @@ use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 sub new {
     my ($package, %args) = @_;
@@ -110,8 +110,8 @@ sub _msg_handler {
     my $event = '_no_reply';
     my $nick = $self->{irc}->nick_name();
     if ($self->{Own_channel} && (l_irc($chan) eq l_irc($self->{Own_channel}))
-        || $type eq 'public' && $what =~ s/^\s*\Q$nick\E[:,;.!?]?\s*(.*)$/$1/i)
-        || $what =~ /$nick/i
+        || $type eq 'public' && $what =~ s/^\s*\Q$nick\E[:,;.!?]?\s*(.*)$/$1/i
+        || $what =~ /$nick/i)
     {
         $event = '_megahal_reply';
     }
