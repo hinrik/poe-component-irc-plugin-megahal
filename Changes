@@ -1,4 +1,4 @@
-0.08  
+0.08  Mon Sep 22 17:58:07 GMT 2008
     - Refactor internals, get rid of a bug caused by previous bugfix
     - Make flood protection affect the private channel as well
 
