@@ -276,9 +276,10 @@ If this argument is not provided, the plugin will construct its own object.
 'MegaHAL_args', a hash reference containing arguments to pass to the constructor
 of a new L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> object.
 
-'Own_channel', a channel where it will reply to all messages. It will try to
-join this channel if the IRC component is not already on it. It will also
-part from it when the plugin is removed from the pipeline. Defaults to none.
+'Own_channel', a channel where it will reply to all messages, as well as greet
+everyone who joins. It will try to join this channel if the IRC component is
+not already on it. It will also part from it when the plugin is removed from
+the pipeline. Defaults to none.
 
 'Flood_interval', default is 60 (seconds), which means that user X in
 channel Y has to wait that long before addressing the bot in the same channel
