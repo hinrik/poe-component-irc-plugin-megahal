@@ -110,8 +110,8 @@ sub _msg_handler {
     my $event = '_no_reply';
     my $nick = $self->{irc}->nick_name();
     if ($self->{Own_channel} && (l_irc($chan) eq l_irc($self->{Own_channel}))
-        || $type eq 'action' && $what =~ /$nick/i
         || $type eq 'public' && $what =~ s/^\s*\Q$nick\E[:,;.!?]?\s*(.*)$/$1/i)
+        || $what =~ /$nick/i
     {
         $event = '_megahal_reply';
     }
