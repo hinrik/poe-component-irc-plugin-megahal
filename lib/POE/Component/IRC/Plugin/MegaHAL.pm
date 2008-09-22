@@ -9,7 +9,7 @@ use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_fo
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 use POE::Component::IRC::Plugin::BotAddressed;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub new {
     my ($package, %args) = @_;
