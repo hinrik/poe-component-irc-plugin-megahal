@@ -3,12 +3,14 @@ package POE::Component::IRC::Plugin::MegaHAL;
 use strict;
 use warnings;
 use Carp;
+use Encode qw(decode);
+use Encode::Guess;
 use POE;
 use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub new {
     my ($package, %args) = @_;
@@ -104,8 +106,7 @@ sub _msg_handler {
     my ($self, $kernel, $type, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
 
     return if $self->_ignoring($user, $chan);
-    $what = strip_color($what);
-    $what = strip_formatting($what);
+    $what = _normalize($what);
 
     my $event = '_no_reply';
     my $nick = $self->{irc}->nick_name();
@@ -135,7 +136,18 @@ sub _greet_handler {
         _target => $chan,
         _nick   => (split /!/, $user)[0],
     });
+
     return;
+}
+
+sub _normalize {
+    my ($line) = @_;
+
+    $line = strip_color($line);
+    $line = strip_formatting($line);
+    my $utf8 = guess_encoding($line, 'utf8');
+    $line = ref $utf8 ? decode('utf8', $line) : decode('cp1252', $line);
+    return $line;
 }
 
 sub brain {
