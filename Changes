@@ -1,3 +1,9 @@
+0.12
+    - Renamed 'Ignore' parameter to 'Ignore_masks'
+    - Renamed 'Flood_interval' parameter to 'Abuse_interval'
+    - Added 'Ignore_regexes'
+    - Added some documentation on ignoring other bots
+
 0.11  Thu Sep 25 00:52:35 GMT 2008
     - Convert input all to UTF-8 before processing.
 

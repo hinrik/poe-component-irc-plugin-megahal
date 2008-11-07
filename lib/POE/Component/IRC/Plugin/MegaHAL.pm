@@ -10,7 +10,7 @@ use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 sub new {
     my ($package, %args) = @_;
@@ -26,8 +26,8 @@ sub new {
     }
 
     $self->{Method} = 'notice' if !defined $self->{Method} || $self->{Method} !~ /privmsg|notice/;
-    $self->{flooders} = { };
-    $self->{Flood_interval} = 60 if !defined $self->{Flood_interval};
+    $self->{abusers} = { };
+    $self->{Abuse_interval} = 60 if !defined $self->{Abuse_interval};
 
     return $self;
 }
@@ -85,19 +85,19 @@ sub _megahal_greeting {
     return;
 }
 
-sub _ignoring {
+sub _ignoring_user {
     my ($self, $user, $chan) = @_;
     
-    if ($self->{Ignore}) {
+    if ($self->{Ignore_masks}) {
         my $mapping = $self->{irc}->isupport('CASEMAPPING');
-        return 1 if keys %{ matches_mask_array($self->{Ignore}, [$user], $mapping) };
+        return 1 if keys %{ matches_mask_array($self->{Ignore_masks}, [$user], $mapping) };
     }
-    
-    # flood protection
+
+    # abuse protection
     my $key = "$user $chan";
-    my $last  = delete $self->{flooders}->{$key};
-    $self->{flooders}->{$key} = time;
-    return 1 if $last && (time - $last < $self->{Flood_interval});
+    my $last  = delete $self->{abusers}->{$key};
+    $self->{abusers}->{$key} = time;
+    return 1 if $last && (time - $last < $self->{Abuse_interval});
     
     return;
 }
@@ -105,7 +105,7 @@ sub _ignoring {
 sub _msg_handler {
     my ($self, $kernel, $type, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
 
-    return if $self->_ignoring($user, $chan);
+    return if $self->_ignoring_user($user, $chan);
     $what = _normalize($what);
 
     my $event = '_no_reply';
@@ -117,18 +117,23 @@ sub _msg_handler {
         $event = '_megahal_reply';
     }
 
+    if ($self->{Ignore_regexes}) {
+        for my $regex (@{ $self->{Ignore_regexes} }) {
+            return if $what =~ $regex;
+        }
+    }
+
     $kernel->post($self->{MegaHAL}->session_id() => do_reply => {
         event   => $event,
         text    => $what,
         _target => $chan,
     });
-
 }
 
 sub _greet_handler {
     my ($self, $kernel, $user, $chan) = @_[OBJECT, KERNEL, ARG0, ARG1];
 
-    return if $self->_ignoring($user, $chan);
+    return if $self->_ignoring_user($user, $chan);
     return if !$self->{Own_channel} || (l_irc($chan) ne l_irc($self->{Own_channel}));
 
     $kernel->post($self->{MegaHAL}->session_id() => initial_greeting => {
@@ -243,6 +248,8 @@ POE::Component::IRC::Plugin::MegaHAL is a L<POE::Component::IRC|POE::Component::
 plugin. It provides "intelligence" through the use of
 L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHal>.
 It will respond when people either mention your nickname or address you.
+All NOTICEs are ignored, so if your other bots only issue NOTICEs like
+they should, they will be ignored automatically.
 
 This plugin requires the IRC component to be L<POE::Component::IRC::State|POE::Component::IRC::State>
 or a subclass thereof. It also requires a L<POE::Component::IRC::Plugin::BotAddressed|POE::Component::IRC::Plugin::BotAddressed>
@@ -268,12 +275,15 @@ everyone who joins. It will try to join this channel if the IRC component is
 not already on it. It will also part from it when the plugin is removed from
 the pipeline. Defaults to none.
 
-'Flood_interval', default is 60 (seconds), which means that user X in
+'Abuse_interval', default is 60 (seconds), which means that user X in
 channel Y has to wait that long before addressing the bot in the same channel
 if he doesn't want to be ignored. Setting this to 0 effectively turns off
-flood protection.
+abuse protection.
 
-'Ignore', an array reference of IRC masks (e.g. "purl!*@*") to ignore.
+'Ignore_masks', an array reference of IRC masks (e.g. "purl!*@*") to ignore.
+
+'Ignore_regexes', an array reference of regex objects. If any message
+matches any of them, it will be ignored.
 
 'Method', how you want messages to be delivered. Valid options are 'notice'
 (the default) and 'privmsg'.
