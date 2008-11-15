@@ -5,7 +5,7 @@ use POE;
 use POE::Component::IRC::State;
 use POE::Component::IRC::Plugin::MegaHAL;
 
-my $irc = POE::Component::IRC::State->spawn( plugin_debug => 1, );
+my $irc = POE::Component::IRC::State->spawn( plugin_debug => 1 );
 
 POE::Session->create(
     package_states => [

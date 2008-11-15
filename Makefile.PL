@@ -10,5 +10,7 @@ WriteMakefile(
     PREREQ_PM     => {
         'POE::Component::AI::MegaHAL' => '0',
         'POE::Component::IRC'         => '0',
-    }
+    },
+
+    clean => { FILES => 't/megahal.dic t/megahal.brn' }
 );
