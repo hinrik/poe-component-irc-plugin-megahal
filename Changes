@@ -1,3 +1,9 @@
+0.15  Sat Nov 29 19:28:53 GMT 2008
+    - Added a tip on ignoring URL-only lines to the SYNOPSIS
+
+0.14  Sat Nov 29 19:16:34 GMT 2008
+    - Added program irchal_seed to create a MegaHAL brain from IRC logs
+
 0.13  Sat Nov 29 15:44:05 GMT 2008
     - It now sees ACTIONs as "$nick $action"
 

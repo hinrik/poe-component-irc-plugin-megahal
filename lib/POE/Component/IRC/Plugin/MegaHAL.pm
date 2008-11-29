@@ -10,7 +10,7 @@ use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 
-our $VERSION = '0.13';
+our $VERSION = '0.15';
 
 sub new {
     my ($package, %args) = @_;
@@ -253,7 +253,11 @@ access to a MegaHAL conversation simulator.
  
  $irc->plugin_add('AutoJoin', POE::Component::IRC::Plugin::AutoJoin->new(Channels => \@channels));
  $irc->plugin_add('Connector', POE::Component::IRC::Plugin::Connector->new());
- $irc->plugin_add('MegaHAL', POE::Component::IRC::Plugin::MegaHAL->new(Own_channel => '#bot_chan'));
+ $irc->plugin_add('MegaHAL', POE::Component::IRC::Plugin::MegaHAL->new(
+     Talkative      => 1,
+     Own_channel    => '#bot_chan',
+     Ignore_regexes => [ qr{^\s*\w+://\S+\s*$} ], # ignore URL-only lines
+ ));
  
  $irc->yield('connect');
  $poe_kernel->run();
