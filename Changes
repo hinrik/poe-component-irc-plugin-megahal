@@ -1,3 +1,6 @@
+0.13  Sat Nov 29 15:44:05 GMT 2008
+    - It now sees ACTIONs as "$nick $action"
+
 0.12  Sat Nov 15 02:58:06 GMT 2008
     - Renamed 'Ignore' parameter to 'Ignore_masks'
     - Renamed 'Flood_interval' parameter to 'Abuse_interval'
