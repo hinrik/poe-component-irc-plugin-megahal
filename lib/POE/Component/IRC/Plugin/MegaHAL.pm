@@ -10,7 +10,7 @@ use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 sub new {
     my ($package, %args) = @_;
@@ -112,8 +112,8 @@ sub _msg_handler {
     my $event = '_no_reply';
     my $nick = $self->{irc}->nick_name();
     if ($self->{Own_channel} && (l_irc($chan) eq l_irc($self->{Own_channel}))
-        || $type eq 'public' && $what =~ s/^\s*\Q$nick\E[:,;.!?]?\s*(.*)$/$1/i
-        || $self->{Talkative} && $what =~ /$nick/i)
+        || $type eq 'public' && $what =~ s/^\s*\Q$nick\E[:,;.!?~]?\s*(.*)$/$1/i
+        || $self->{Talkative} && $what =~ /\Q$nick/i)
     {
         $event = '_megahal_reply';
     }
@@ -194,7 +194,7 @@ sub S_ctcp_action {
     
     $poe_kernel->post(
         $self->{session_id},
-        ' _msg_handler',
+        '_msg_handler',
         'action',
         $user, 
         $chan,
@@ -273,10 +273,8 @@ situations, see L<C<new>|/"new">.
 All NOTICEs are ignored, so if your other bots only issue NOTICEs like
 they should, they will be ignored automatically.
 
-This plugin requires the IRC component to be L<POE::Component::IRC::State|POE::Component::IRC::State>
-or a subclass thereof. It also requires a L<POE::Component::IRC::Plugin::BotAddressed|POE::Component::IRC::Plugin::BotAddressed>
-to be in the plugin pipeline. It will be added automatically if it is not
-present.
+This plugin requires the IRC component to be
+L<POE::Component::IRC::State|POE::Component::IRC::State> or a subclass thereof.
 
 =head1 METHODS
 
@@ -284,36 +282,36 @@ present.
 
 Takes the following optional arguments:
 
-I<'MegaHAL'>, a reference to an existing
+B<'MegaHAL'>, a reference to an existing
 L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> object you have
 lying around. Useful if you want to use it with multiple IRC components.
 If this argument is not provided, the plugin will construct its own object.
 
-I<'MegaHAL_args'>, a hash reference containing arguments to pass to the
+B<'MegaHAL_args'>, a hash reference containing arguments to pass to the
 constructor of a new L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL>
 object.
 
-I<'Own_channel'>, a channel where it will reply to all messages, as well as
+B<'Own_channel'>, a channel where it will reply to all messages, as well as
 greet everyone who joins. The plugin will take care of joining the channel.
 It will part from it when the plugin is removed from the pipeline. Defaults
 to none.
 
-I<'Abuse_interval'>, default is 60 (seconds), which means that user X in
+B<'Abuse_interval'>, default is 60 (seconds), which means that user X in
 channel Y has to wait that long before addressing the bot in the same channel
 if he doesn't want to be ignored. Setting this to 0 effectively turns off
 abuse protection.
 
-I<'Talkative'>, when set to true, the bot will respond whenever someone
+B<'Talkative'>, when set to true, the bot will respond whenever someone
 mentions its name (via PRIVMSG or ACTION). If false, it will only respond
 when addressed directly. Default is false.
 
-I<'Ignore_masks'>, an array reference of IRC masks (e.g. "purl!*@*") to
+B<'Ignore_masks'>, an array reference of IRC masks (e.g. "purl!*@*") to
 ignore.
 
-I<'Ignore_regexes'>, an array reference of regex objects. If a message
+B<'Ignore_regexes'>, an array reference of regex objects. If a message
 matches any of them, it will be ignored.
 
-I<'Method'>, how you want messages to be delivered. Valid options are
+B<'Method'>, how you want messages to be delivered. Valid options are
 'notice' (the default) and 'privmsg'.
 
 Returns a plugin object suitable for feeding to

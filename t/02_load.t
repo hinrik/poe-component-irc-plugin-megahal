@@ -5,11 +5,12 @@ use POE;
 use POE::Component::IRC::State;
 use POE::Component::IRC::Plugin::MegaHAL;
 
+unlink qw(t/megahal.dic t/megahal.brn);
 my $irc = POE::Component::IRC::State->spawn( plugin_debug => 1 );
 
 POE::Session->create(
     package_states => [
-        main => [ qw(_start irc_plugin_add irc_plugin_del) ],
+        main => [ qw(_start irc_plugin_add irc_plugin_del irc_shutdown) ],
     ],
 );
 
@@ -49,4 +50,8 @@ sub irc_plugin_del {
 
     isa_ok($plugin, 'POE::Component::IRC::Plugin::MegaHAL');
     $irc->yield('shutdown');
+}
+
+sub irc_shutdown {
+    unlink qw(t/megahal.dic t/megahal.brn);
 }

@@ -22,9 +22,9 @@ LINE: while (my $line = <STDIN>) {
     if (($nick, $msg) = $line =~ /^\S+ \S+ <(\S+)> (.*)/) {
         # PRIVMSG 
         if (defined $bot) {
-            my ($first) = $msg =~ /^\s*([^0\s][^\s:,;.!?]*)[:,;.!?]?\s*/;
+            my ($first) = $msg =~ /^\s*([^0\s][^\s:,;.!?]*)[:,;.!?~]?\s*/;
             if (defined $first && l_irc($first) eq l_irc($bot)) {
-                $msg =~ s/\Q$first\E[:,;.!?]?\s*//;
+                $msg =~ s/\Q$first\E[:,;.!?~]?\s*//;
             }
         }
         

@@ -1,3 +1,7 @@
+0.16
+    - Fix typo which was causing CTCP ACTIONs to be ignored
+    - Some Pod updates
+
 0.15  Sat Nov 29 19:28:53 GMT 2008
     - Added a tip on ignoring URL-only lines to the SYNOPSIS
 
