@@ -1,3 +1,6 @@
+0.17
+    - Add irssi support to irchal_seed, improve its documentation
+
 0.16  Sun Mar  8 01:59:32 GMT 2009
     - Fix typo which was causing CTCP ACTIONs to be ignored
     - Some Pod updates
