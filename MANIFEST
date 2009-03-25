@@ -3,7 +3,7 @@ MANIFEST
 INSTALL
 Changes
 lib/POE/Component/IRC/Plugin/MegaHAL.pm
-script/irchal_seed
+script/irchal-seed
 t/01_compile.t
 t/02_load.t
 t/99_pod.t
