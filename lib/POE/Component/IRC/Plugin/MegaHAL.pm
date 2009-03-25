@@ -10,7 +10,7 @@ use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 sub new {
     my ($package, %args) = @_;
