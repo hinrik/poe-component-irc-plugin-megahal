@@ -1,3 +1,6 @@
+0.19  Wed Mar 25 23:49:54 GMT 2009
+    - Forgot to import some functions. Oops.
+
 0.18  Wed Mar 25 23:45:28 GMT 2009
     - Rename irchal_seed to irchal-seed
     - Enable the stripping of color/formatting codes with --strip

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Getopt::Long qw(:config autohelp);
-use POE::Component::IRC::Common qw(l_irc);
+use POE::Component::IRC::Common qw(l_irc strip_color strip_formatting);
 use Pod::Usage;
 
 my $VERSION = '0.01';
