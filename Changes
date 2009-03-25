@@ -1,4 +1,4 @@
-0.17
+0.17  Wed Mar 25 16:48:34 UTC 2009
     - Add irssi support to irchal_seed
     - Make irchal_seed's casemapping configurable
     - Improve irchal_seed's documentation
