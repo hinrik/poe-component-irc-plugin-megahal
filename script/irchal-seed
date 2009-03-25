@@ -13,6 +13,7 @@ GetOptions(
     'b|bot=s'          => \my $bot,
     'r|ignore-regex=s' => \my @ignore_regexes,
     'n|ignore-nick=s'  => \my @ignore_nicks,
+    's|strip=s'        => \(my $strip = ''),
 ) or pod2usage();
 
 my ($privmsg, $action);
@@ -39,6 +40,13 @@ LINE: while (my $line = <STDIN>) {
             ? Encode::decode('utf8', $line)
             : Encode::decode('cp1252', $line)
         ;
+    }
+
+    if ($strip =~ /^(?:color|both)$/) {
+        $line = strip_color($line);
+    }
+    if ($strip =~ /^(?:formatting|both)$/) {
+        $line = strip_formatting($line);
     }
 
     my ($nick, $msg);
@@ -88,6 +96,7 @@ B<irchal_seed> <options>
    -b, --bot           The name of the IRC bot
    -r, --ignore-regex  A regex for lines to ignore
    -n, --ignore-nick   A nickname to ignore
+   -s, --strip=OPT     Strip 'color', 'formatting', or 'both'
 
 Input is accepted on STDIN, and output is delivered to STDOUT.
 

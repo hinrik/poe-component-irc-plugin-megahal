@@ -1,5 +1,6 @@
 0.18
     - Rename irchal_seed to irchal-seed
+    - Enable the stripping of color/formatting codes with --strip
 
 0.17  Wed Mar 25 16:48:34 UTC 2009
     - Add irssi support to irchal_seed
