@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
@@ -6,7 +7,10 @@ WriteMakefile(
     AUTHOR        => 'Hinrik Örn Sigurðsson <hinrik.sig@gmail.com>',
     VERSION_FROM  => 'lib/POE/Component/IRC/Plugin/MegaHAL.pm',
     ABSTRACT_FROM => 'lib/POE/Component/IRC/Plugin/MegaHAL.pm',
-    LICENSE       => 'perl',
+    ($ExtUtils::MakeMaker::VERSION >= 6.31
+        ? (LICENSE => 'perl')
+        : ()
+    ),
     EXE_FILES     => [ 'script/irchal-seed' ],
     PREREQ_PM     => {
         'POE::Component::AI::MegaHAL' => '0',
