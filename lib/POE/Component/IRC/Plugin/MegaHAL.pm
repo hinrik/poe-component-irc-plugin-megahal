@@ -276,6 +276,11 @@ situations, see L<C<new>|/"new">). An example:
 All NOTICEs are ignored, so if your other bots only issue NOTICEs like
 they should, they will be ignored automatically.
 
+Before using, you should read the documentation for
+L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> and by extension,
+L<AI::MegaHAL|AI::MegaHAL>, so you have an idea of what to pass as the
+B<'MegaHAL_args'> parameter to L<C<new>|/"new">.
+
 This plugin requires the IRC component to be
 L<POE::Component::IRC::State|POE::Component::IRC::State> or a subclass thereof.
 
