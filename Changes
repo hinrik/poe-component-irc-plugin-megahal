@@ -1,3 +1,7 @@
+0.21
+    - Updated documentation
+    - Outsource recoding to irc_to_utf8() of PoCo::IRC 6.06
+
 0.20  Fri Mar 27 19:04:53 GMT 2009
     - Fix error in Makefile.PL
 
