@@ -3,11 +3,9 @@ package POE::Component::IRC::Plugin::MegaHAL;
 use strict;
 use warnings;
 use Carp;
-use Encode qw(decode);
-use Encode::Guess;
 use POE;
 use POE::Component::AI::MegaHAL;
-use POE::Component::IRC::Common qw(l_irc matches_mask_array strip_color strip_formatting);
+use POE::Component::IRC::Common qw(l_irc matches_mask_array irc_to_utf8 strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 
 our $VERSION = '0.20';
@@ -151,10 +149,9 @@ sub _greet_handler {
 sub _normalize {
     my ($line) = @_;
 
+    $line = irc_to_utf8($line);
     $line = strip_color($line);
     $line = strip_formatting($line);
-    my $utf8 = guess_encoding($line, 'utf8');
-    $line = ref $utf8 ? decode('utf8', $line) : decode('cp1252', $line);
     return $line;
 }
 
