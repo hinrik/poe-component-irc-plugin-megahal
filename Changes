@@ -1,4 +1,4 @@
-0.21
+0.21  Thu Apr 30 12:58:33 GMT 2009
     - Updated documentation
     - Outsource recoding to irc_to_utf8() of PoCo::IRC 6.06
 
