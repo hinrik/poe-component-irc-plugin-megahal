@@ -6,14 +6,13 @@ use Getopt::Long qw(:config autohelp);
 use POE::Component::IRC::Common qw(l_irc strip_color strip_formatting);
 use Pod::Usage;
 
-my $VERSION = '0.02';
+my $VERSION = '0.03';
 
 GetOptions(
     'f|format=s'       => \(my $format = ''),
     'b|bot=s'          => \my $bot,
     'r|ignore-regex=s' => \my @ignore_regexes,
     'n|ignore-nick=s'  => \my @ignore_nicks,
-    's|strip=s'        => \(my $strip = ''),
 ) or pod2usage();
 
 my ($privmsg, $action);
@@ -43,12 +42,8 @@ LINE: while (my $line = <STDIN>) {
         ;
     }
 
-    if ($strip =~ /^(?:color|both)$/) {
-        $line = strip_color($line);
-    }
-    if ($strip =~ /^(?:formatting|both)$/) {
-        $line = strip_formatting($line);
-    }
+    $line = strip_color($line);
+    $line = strip_formatting($line);
 
     my ($nick, $msg);
     if (($nick, $msg) = $line =~ /$privmsg/) {
