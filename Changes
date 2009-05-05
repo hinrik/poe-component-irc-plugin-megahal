@@ -1,4 +1,4 @@
-0.23
+0.23  Tue May  5 15:03:41 UTC 2009
     - irchal-seed: Always strip color and formatting codes
     - Depend on new PoCo::AI::MegaHAL which has a bugfix
 
