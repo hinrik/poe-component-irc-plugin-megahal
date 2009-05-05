@@ -6,7 +6,7 @@ use Getopt::Long qw(:config autohelp);
 use POE::Component::IRC::Common qw(l_irc strip_color strip_formatting);
 use Pod::Usage;
 
-my $VERSION = '0.01';
+my $VERSION = '0.02';
 
 GetOptions(
     'f|format=s'       => \(my $format = ''),
@@ -29,6 +29,7 @@ else {
     die "No log format specified with --format\n";
 }
 
+binmode STDOUT, ':utf8';
 LINE: while (my $line = <STDIN>) {
     chomp $line;
 
