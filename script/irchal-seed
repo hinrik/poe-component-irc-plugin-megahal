@@ -87,12 +87,11 @@ or irssi.
 B<irchal-seed> <options>
 
  Options:
-   -f, --format=NAME   Specify a log format (pocoirc or irssi)
-   -c, --case=NAME     The IRC server's case mapping (see below)
-   -b, --bot           The name of the IRC bot
-   -r, --ignore-regex  A regex for lines to ignore
-   -n, --ignore-nick   A nickname to ignore
-   -s, --strip=OPT     Strip 'color', 'formatting', or 'both'
+   -f FORMAT, --format=NAME     Specify a log format (pocoirc or irssi)
+   -c CASE, --case=CASE         The IRC server's case mapping (see below)
+   -b NICK, --bot=NICK          The name of the IRC bot
+   -r RX --ignore-regex=RX      A regex for lines to ignore
+   -n NICK, --ignore-nick=NICK  A nickname to ignore
 
 Input is accepted on STDIN, and output is delivered to STDOUT.
 
