@@ -111,7 +111,7 @@ prefixed with '!'.
 
  Example:
   # convert logs, ignoring lines containing URLs
-  cat ~/logs/\#chan.log | irchal_seed -b MyBot -r '\w+://\w' > megahal.trn
+  cat ~/logs/\#chan.log | irchal-seed -b MyBot -r '\w+://\w' > megahal.trn
 
 =head1 AUTHOR
 
