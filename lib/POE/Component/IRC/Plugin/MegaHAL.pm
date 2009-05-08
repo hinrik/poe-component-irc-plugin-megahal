@@ -44,11 +44,7 @@ sub PCI_register {
         ],
     );
 
-    if ($self->{Own_channel} && !$irc->is_channel_member($irc->nick_name())) {
-        $irc->yield(join => $self->{Own_channel});
-    }
-
-    $irc->plugin_register($self, 'SERVER', qw(001 ctcp_action join public));
+    $irc->plugin_register($self, 'SERVER', qw(isupport ctcp_action join public));
     return 1;
 }
 
@@ -174,7 +170,7 @@ sub transplant {
     return $old_brain;
 }
 
-sub S_001 {
+sub S_isupport {
     my ($self, $irc) = splice @_, 0, 2;
     $irc->yield(join => $self->{Own_channel}) if $self->{Own_channel};
     return PCI_EAT_NONE;
