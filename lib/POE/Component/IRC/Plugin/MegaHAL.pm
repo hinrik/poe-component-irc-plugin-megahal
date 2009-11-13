@@ -68,6 +68,10 @@ sub _start {
 
 sub _megahal_reply {
     my ($self, $info) = @_[OBJECT, ARG0];
+    if ($self->{English}) {
+        $info->{reply} =~ s{\bi\b}{I};
+        $info->{reply} =~ s{(?<=\w)$}{.};
+    }
     $self->{irc}->yield($self->{Method} => $info->{_target}, $info->{reply});
     return;
 }
@@ -318,6 +322,10 @@ URLs in them.
 
 B<'Method'>, how you want messages to be delivered. Valid options are
 'notice' (the default) and 'privmsg'.
+
+B<'English'>, whether to apply some English-language corrections to the bot's
+output. Currently it capitalizes the word 'I' and ends paragraphs with '.'
+where appropriate. Defaults to false.
 
 Returns a plugin object suitable for feeding to
 L<POE::Component::IRC|POE::Component::IRC>'s plugin_add() method.
