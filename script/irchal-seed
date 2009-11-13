@@ -6,7 +6,7 @@ use Getopt::Long qw(:config autohelp);
 use POE::Component::IRC::Common qw(l_irc strip_color strip_formatting);
 use Pod::Usage;
 
-my $VERSION = '0.03';
+my $VERSION = '0.04';
 
 GetOptions(
     'f|format=s'       => \(my $format = ''),
@@ -87,31 +87,32 @@ or irssi.
 B<irchal-seed> <options>
 
  Options:
-   -f FORMAT, --format=NAME     Specify a log format (pocoirc or irssi)
-   -c CASE, --case=CASE         The IRC server's case mapping (see below)
-   -b NICK, --bot=NICK          The name of the IRC bot
+   -f FORMAT, --format=NAME     Log format (pocoirc or irssi)
+   -c CASE, --case=CASE         The IRC server's case mapping
+   -b NICK, --bot=NICK          The nickname of the IRC bot
    -r RX --ignore-regex=RX      A regex for lines to ignore
    -n NICK, --ignore-nick=NICK  A nickname to ignore
 
 Input is accepted on STDIN, and output is delivered to STDOUT.
 
-The C<--case> option controls the second parameter passed to C<l_irc>
-from L<POE::Component::IRC::Common|POE::Component::IRC::Common>. The defalt
-is B<'rfc1459'>. You usually don't have to change this. Consult that
-package's documentation for more details.
-
-You should specify the C<--bot> option if your bot was present when the
-channel was logged as it will strip the "botname: " part from message
-where users addressed the bot.
+You should use the C<--bot> option if your bot was present when the channel
+was logged as it will strip the "botname: " part from message where users
+addressed the bot.
 
 If your bot (or any other bot in the channel) can take commands that all
 start in a similar way, use the C<--ignore-regex> option to ignore those
 lines, e.g. C<--ignore-regex='^!\w+'> for bots that react to commands
 prefixed with '!'.
 
- Example:
-  # convert logs, ignoring lines containing URLs
-  cat ~/logs/\#chan.log | irchal-seed -b MyBot -r '\w+://\w' > megahal.trn
+Example:
+
+  # convert irssi log, stripping "MyBot: " prefix and ignoring lines with URLs
+  cat ~/logs/\#chan.log | irchal-seed -f irssi -b MyBot -r '\w+://\w' > megahal.trn
+
+The C<--case> option controls the second parameter passed to C<l_irc>
+from L<POE::Component::IRC::Common|POE::Component::IRC::Common>. The defalt
+is B<'rfc1459'>. You usually don't have to change this. Consult that
+package's documentation for more information.
 
 =head1 AUTHOR
 

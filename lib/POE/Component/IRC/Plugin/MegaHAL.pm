@@ -242,8 +242,8 @@ access to a MegaHAL conversation simulator.
  use POE::Component::IRC::State;
  
  my $irc = POE::Component::IRC::State->spawn(
-     nick     => 'Brainy',
-     server   => 'irc.freenode.net',
+     nick   => 'Brainy',
+     server => 'irc.freenode.net',
  );
  
  my @channels = ('#public_chan', '#bot_chan');
@@ -251,8 +251,8 @@ access to a MegaHAL conversation simulator.
  $irc->plugin_add('AutoJoin', POE::Component::IRC::Plugin::AutoJoin->new(Channels => \@channels));
  $irc->plugin_add('Connector', POE::Component::IRC::Plugin::Connector->new());
  $irc->plugin_add('MegaHAL', POE::Component::IRC::Plugin::MegaHAL->new(
-     Talkative      => 1,
      Own_channel    => '#bot_chan',
+     English        => 1,
      Ignore_regexes => [ qr{^\s*\w+://\S+\s*$} ], # ignore URL-only lines
  ));
  
@@ -309,9 +309,9 @@ channel Y has to wait that long before addressing the bot in the same channel
 if he doesn't want to be ignored. Setting this to 0 effectively turns off
 abuse protection.
 
-B<'Talkative'>, when set to true, the bot will respond whenever someone
-mentions its name (in a PRIVMSG or CTCP ACTION (/me)). If false, it will only
-respond when addressed directly with a PRIVMSG. Default is false.
+B<'Talkative'>, when set to a true value, the bot will respond whenever
+someone mentions its name (in a PRIVMSG or CTCP ACTION (/me)). If false, it
+will only respond when addressed directly with a PRIVMSG. Default is false.
 
 B<'Ignore_masks'>, an array reference of IRC masks (e.g. "purl!*@*") to
 ignore.
@@ -323,9 +323,10 @@ URLs in them.
 B<'Method'>, how you want messages to be delivered. Valid options are
 'notice' (the default) and 'privmsg'.
 
-B<'English'>, whether to apply some English-language corrections to the bot's
-output. Currently it capitalizes the word 'I' and ends paragraphs with '.'
-where appropriate. Defaults to false.
+B<'English'>, when set to a true value, some English-language corrections
+will be applied to the bot's output. Currently it will capitalizes the word
+'I' and make sure paragraphs end with '.' where appropriate. Defaults to
+false.
 
 Returns a plugin object suitable for feeding to
 L<POE::Component::IRC|POE::Component::IRC>'s plugin_add() method.
