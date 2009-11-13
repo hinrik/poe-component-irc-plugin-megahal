@@ -7,7 +7,7 @@ WriteMakefile(
     AUTHOR        => 'Hinrik Örn Sigurðsson <hinrik.sig@gmail.com>',
     VERSION_FROM  => 'lib/POE/Component/IRC/Plugin/MegaHAL.pm',
     ABSTRACT_FROM => 'lib/POE/Component/IRC/Plugin/MegaHAL.pm',
-    ($ExtUtils::MakeMaker::VERSION >= 6.31
+    ($ExtUtils::MakeMaker::VERSION ge '6.31'
         ? (LICENSE => 'perl')
         : ()
     ),
