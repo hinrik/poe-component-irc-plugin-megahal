@@ -307,13 +307,14 @@ abuse protection.
 
 B<'Talkative'>, when set to true, the bot will respond whenever someone
 mentions its name (in a PRIVMSG or CTCP ACTION (/me)). If false, it will only
-respond when addressed directly in a PRIVMSG. Default is false.
+respond when addressed directly with a PRIVMSG. Default is false.
 
 B<'Ignore_masks'>, an array reference of IRC masks (e.g. "purl!*@*") to
 ignore.
 
 B<'Ignore_regexes'>, an array reference of regex objects. If a message
-matches any of them, it will be ignored.
+matches any of them, it will be ignored. Handy for ignoring messages with
+URLs in them.
 
 B<'Method'>, how you want messages to be delivered. Valid options are
 'notice' (the default) and 'privmsg'.
