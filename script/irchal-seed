@@ -110,7 +110,7 @@ Example:
   cat ~/logs/\#chan.log | irchal-seed -f irssi -b MyBot -r '\w+://\w' > megahal.trn
 
 The C<--case> option controls the second parameter passed to C<l_irc>
-from L<POE::Component::IRC::Common|POE::Component::IRC::Common>. The defalt
+from L<POE::Component::IRC::Common|POE::Component::IRC::Common>. The default
 is B<'rfc1459'>. You usually don't have to change this. Consult that
 package's documentation for more information.
 
