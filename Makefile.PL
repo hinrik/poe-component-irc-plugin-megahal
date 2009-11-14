@@ -13,6 +13,7 @@ WriteMakefile(
     ),
     EXE_FILES     => [ 'script/irchal-seed' ],
     PREREQ_PM     => {
+        'Encode'                      => '0',
         'POE::Component::AI::MegaHAL' => '1.18',
         'POE::Component::IRC'         => '6.06',
     },
