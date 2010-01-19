@@ -73,6 +73,9 @@ LINE: while (my $line = <STDIN>) {
         next LINE if $msg =~ /$regex/;
     }
 
+    # MegaHAL ignores lines in megahal.trn which start with '#'
+    $msg = " $msg" if $msg =~ /^#/;
+
     print "$msg\n";
 }
 
