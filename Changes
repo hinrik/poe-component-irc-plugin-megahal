@@ -2,6 +2,7 @@
     - irchal-seed: Prepend a space to lines beginning with '#' so MegaHAL
       won't ignore them in megahal.trn
     - irchal-seed: Add a --version option
+    - Forgot to decode data from MegaHAL's initial_greeting
 
 0.27  Sat Nov 14 14:22:06 GMT 2009
     - Fix a problem with the English correction, especially when non-ASCII

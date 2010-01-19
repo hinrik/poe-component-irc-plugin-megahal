@@ -69,7 +69,8 @@ sub _start {
 
 sub _megahal_reply {
     my ($self, $info) = @_[OBJECT, ARG0];
-    $info->{reply} = decode('UTF-8', $info->{reply});
+    $info->{reply} = decode('utf8', $info->{reply});
+
     if ($self->{English}) {
         $info->{reply} =~ s{\bi\b}{I}g;
         $info->{reply} =~ s{(?<=\w)$}{.};
@@ -80,6 +81,8 @@ sub _megahal_reply {
 
 sub _megahal_greeting {
     my ($self, $info) = @_[OBJECT, ARG0];
+    $info->{reply} = decode('utf8', $info->{reply});
+
     my $reply = "$info->{_nick}: $info->{reply}";
     $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
     return;
