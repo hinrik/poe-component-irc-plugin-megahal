@@ -15,7 +15,7 @@ WriteMakefile(
     PREREQ_PM     => {
         'Encode'                      => '0',
         'POE::Component::AI::MegaHAL' => '1.18',
-        'POE::Component::IRC'         => '6.06',
+        'POE::Component::IRC'         => '6.20',
     },
     clean => { FILES => 't/megahal.dic t/megahal.brn' }
 );
