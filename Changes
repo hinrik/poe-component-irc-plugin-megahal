@@ -1,4 +1,4 @@
-0.28
+0.28  Tue Jan 19 23:18:31 GMT 2010
     - irchal-seed: Prepend a space to lines beginning with '#' so MegaHAL
       won't ignore them in megahal.trn
     - irchal-seed: Add a --version option
