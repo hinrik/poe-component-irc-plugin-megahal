@@ -147,7 +147,7 @@ sub _greet_handler {
     return;
 }
 
-sub normalize_megahal {
+sub _normalize_megahal {
     my ($self, $line) = @_;
 
     $line = decode('utf8', $line);
