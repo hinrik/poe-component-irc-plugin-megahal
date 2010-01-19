@@ -69,21 +69,17 @@ sub _start {
 
 sub _megahal_reply {
     my ($self, $info) = @_[OBJECT, ARG0];
-    $info->{reply} = decode('utf8', $info->{reply});
-
-    if ($self->{English}) {
-        $info->{reply} =~ s{\bi\b}{I}g;
-        $info->{reply} =~ s{(?<=\w)$}{.};
-    }
-    $self->{irc}->yield($self->{Method} => $info->{_target}, $info->{reply});
+    my $reply = $self->_normalize_megahal($info->{reply});
+    
+    $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
     return;
 }
 
 sub _megahal_greeting {
     my ($self, $info) = @_[OBJECT, ARG0];
-    $info->{reply} = decode('utf8', $info->{reply});
-
-    my $reply = "$info->{_nick}: $info->{reply}";
+    my $reply = $self->_normalize_megahal($info->{reply});
+    $reply = "$info->{_nick}: $reply";
+    
     $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
     return;
 }
@@ -109,7 +105,7 @@ sub _msg_handler {
     my ($self, $kernel, $type, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
 
     return if $self->_ignoring_user($user, $chan);
-    $what = _normalize($what);
+    $what = _normalize_irc($what);
 
     # should we reply?
     my $event = '_no_reply';
@@ -151,7 +147,18 @@ sub _greet_handler {
     return;
 }
 
-sub _normalize {
+sub normalize_megahal {
+    my ($self, $line) = @_;
+
+    $line = decode('utf8', $line);
+    if ($self->{English}) {
+        $line =~ s{\bi\b}{I}g;
+        $line =~ s{(?<=\w)$}{.};
+    }
+    return $line;
+}
+
+sub _normalize_irc {
     my ($line) = @_;
 
     $line = irc_to_utf8($line);
