@@ -1,21 +1,20 @@
 use strict;
 use warnings;
-use ExtUtils::MakeMaker;
+use inc::Module::Install;
+use 5.006;
 
-WriteMakefile(
-    NAME          => 'POE::Component::IRC::Plugin::MegaHAL',
-    AUTHOR        => 'Hinrik Örn Sigurðsson <hinrik.sig@gmail.com>',
-    VERSION_FROM  => 'lib/POE/Component/IRC/Plugin/MegaHAL.pm',
-    ABSTRACT_FROM => 'lib/POE/Component/IRC/Plugin/MegaHAL.pm',
-    ($ExtUtils::MakeMaker::VERSION ge '6.31'
-        ? (LICENSE => 'perl')
-        : ()
-    ),
-    EXE_FILES     => [ 'script/irchal-seed' ],
-    PREREQ_PM     => {
-        'Encode'                      => '0',
-        'POE::Component::AI::MegaHAL' => '1.18',
-        'POE::Component::IRC'         => '6.20',
-    },
-    clean => { FILES => 't/megahal.dic t/megahal.brn' }
-);
+name           ('POE-Component-IRC-Plugin-MegaHAL');
+perl_version   ('5.006');
+author         ('Hinrik Örn Sigurðsson <hinrik.sig@gmail.com>');
+abstract_from  ('lib/POE/Component/IRC/Plugin/MegaHAL.pm');
+version_from   ('lib/POE/Component/IRC/Plugin/MegaHAL.pm');
+install_script ('script/irchal-seed');
+license        ('perl');
+githubmeta     ();
+clean_files    ('t/megahal.dic t/megahal.brn');
+requires       ('POE::Component::AI::MegaHAL' => '0');
+requires       ('POE::Component::IRC'         => '6.20');
+test_requires  ('Test::More'                  => '0');
+tests_recursive();
+author_tests   ('xt');
+WriteAll();
