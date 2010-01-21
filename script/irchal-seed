@@ -91,11 +91,13 @@ or irssi.
 B<irchal-seed> <options>
 
  Options:
-   -f FORMAT, --format=NAME     Log format (pocoirc or irssi)
-   -c CASE, --case=CASE         The IRC server's case mapping
-   -b NICK, --bot=NICK          The nickname of the IRC bot
-   -r RX --ignore-regex=RX      A regex for lines to ignore
-   -n NICK, --ignore-nick=NICK  A nickname to ignore
+   -f FORMAT, --format=NAME         Log format (pocoirc or irssi)
+   -c CASE,   --case=CASE           The IRC server's case mapping
+   -b NICK,   --bot=NICK            The nickname of the IRC bot
+   -r RX      --ignore-regex=RX     A regex for lines to ignore
+   -n NICK,   --ignore-nick=NICK    A nickname to ignore
+   -h,        --help                Print this help message
+   -v,        --version             Print version number
 
 Input is accepted on STDIN, and output is delivered to STDOUT.
 
