@@ -1,3 +1,6 @@
+0.31
+    - irchal-seed: Amend bot-nick-catching regex a bit
+
 0.30  Tue Jan 19 23:49:23 GMT 2010
     - Fix typo in subroutine name
 
