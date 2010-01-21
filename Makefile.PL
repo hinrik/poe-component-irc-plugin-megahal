@@ -15,6 +15,7 @@ clean_files    ('t/megahal.dic t/megahal.brn');
 requires       ('POE::Component::AI::MegaHAL' => '0');
 requires       ('POE::Component::IRC'         => '6.20');
 test_requires  ('Test::More'                  => '0');
+test_requires  ('Test::Script'                => '0');
 tests_recursive();
 author_tests   ('xt');
 WriteAll();

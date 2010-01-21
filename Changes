@@ -2,6 +2,7 @@
     - irchal-seed: Amend bot-nick-catching regex a bit
     - irchal-seed: Document the --help and --version options
     - Converted distribution over to Module::Install
+    - Test irchal-seed with Test::Script
 
 0.30  Tue Jan 19 23:49:23 GMT 2010
     - Fix typo in subroutine name
