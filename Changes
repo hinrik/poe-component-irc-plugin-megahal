@@ -1,4 +1,4 @@
-0.31
+0.31  Thu Jan 21 21:39:39 GMT 2010
     - irchal-seed: Amend bot-nick-catching regex a bit
     - irchal-seed: Document the --help and --version options
     - Converted distribution over to Module::Install
