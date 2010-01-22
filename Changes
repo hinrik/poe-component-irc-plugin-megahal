@@ -1,3 +1,7 @@
+0.32
+    - Make MegaHAL.pm and irchal-seed use the same regex to identify lines
+      where the bot is addressed
+
 0.31  Thu Jan 21 21:39:39 GMT 2010
     - irchal-seed: Amend bot-nick-catching regex a bit
     - irchal-seed: Document the --help and --version options

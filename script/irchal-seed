@@ -49,12 +49,7 @@ LINE: while (my $line = <STDIN>) {
     my ($nick, $msg);
     if (($nick, $msg) = $line =~ /$privmsg/) {
         # PRIVMSG 
-        if (defined $bot) {
-            my ($first) = $msg =~ /^\s*([^\s:,;.!?]+?)[:,;.!?]?/;
-            if (defined $first && l_irc($first) eq l_irc($bot)) {
-                $msg =~ s/\Q$first\E[:,;.!?]?\s*//;
-            }
-        }
+        $msg =~ s/^\s*\Q$bot\E[:,;.!?~]?\s?//i if defined $bot;
     }
     elsif (($msg) = $line =~ /$action/) {
         # ACTION
