@@ -41,7 +41,7 @@ sub PCI_register {
     $self->{irc} = $irc;
     POE::Session->create(
         object_states => [
-            $self => [qw(_start _megahal_reply _megahal_greeting _greet_handler _msg_handler)],
+            $self => [qw(_start _sig_DIE _megahal_reply _megahal_greeting _greet_handler _msg_handler)],
         ],
     );
 
@@ -62,8 +62,18 @@ sub PCI_unregister {
 
 sub _start {
     my ($kernel, $self, $session) = @_[KERNEL, OBJECT, SESSION];
+    $kernel->sig(DIE => '_sig_DIE');
     $self->{session_id} = $session->ID();
     $kernel->refcount_increment($self->{session_id}, __PACKAGE__);
+    return;
+}
+
+sub _sig_DIE {
+    my ($kernel, $self, $ex) = @_[KERNEL, OBJECT, ARG1];
+    chomp $ex->{error_str};
+    warn "Error: Event $ex->{event} in $ex->{dest_session} raised exception:\n";
+    warn "  $ex->{error_str}\n";
+    $kernel->sig_handled();
     return;
 }
 
