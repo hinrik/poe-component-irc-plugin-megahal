@@ -41,7 +41,16 @@ sub PCI_register {
     $self->{irc} = $irc;
     POE::Session->create(
         object_states => [
-            $self => [qw(_start _sig_DIE _megahal_reply _megahal_greeting _greet_handler _msg_handler)],
+            $self => [qw(
+                _start
+                _sig_DIE
+                _save
+                _megahal_reply
+                _megahal_greeting
+                _megahal_saved
+                _greet_handler
+                _msg_handler
+            )],
         ],
     );
 
@@ -54,10 +63,20 @@ sub PCI_unregister {
 
     $irc->yield(part => $self->{Own_channel}) if $self->{Own_channel};
     delete $self->{irc};
-    $poe_kernel->post($self->{MegaHAL}->session_id() => 'shutdown') unless $self->{keep_alive};
-    delete $self->{MegaHAL};
-    $poe_kernel->refcount_decrement($self->{session_id}, __PACKAGE__);
+    $poe_kernel->post($self->{session_id}, '_save');
+
     return 1;
+}
+
+sub _save {
+    my ($kernel, $self) = @_[KERNEL, OBJECT];
+
+    $kernel->post(
+        $self->{MegaHAL}->session_id(),
+        '_cleanup',
+        { event => '_megahal_saved' },
+    );
+    return;
 }
 
 sub _start {
@@ -91,6 +110,17 @@ sub _megahal_greeting {
     $reply = "$info->{_nick}: $reply";
     
     $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
+    return;
+}
+
+sub _megahal_saved {
+    my ($kernel, $self) = @_[KERNEL, OBJECT];
+
+    if (!$self->{keep_alive}) {
+        $poe_kernel->post($self->{MegaHAL}->session_id(), 'shutdown');
+    }
+    delete $self->{MegaHAL};
+    $poe_kernel->refcount_decrement($self->{session_id}, __PACKAGE__);
     return;
 }
 
