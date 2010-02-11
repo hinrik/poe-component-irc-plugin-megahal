@@ -42,7 +42,7 @@ LINE: while (my $line = <STDIN>) {
     my ($nick, $msg);
     if (($nick, $msg) = $line =~ /$privmsg/) {
         # PRIVMSG 
-        $msg =~ s/^\s*\Q$bot\E[:,;.!?~]?\s?//i if defined $bot;
+        $msg =~ s/^\s*\Q$bot\E[:,;.!?~]?\s//i if defined $bot;
     }
     elsif (($msg) = $line =~ /$action/) {
         # ACTION

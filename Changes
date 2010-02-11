@@ -1,4 +1,5 @@
 0.32
+    - When we're addressed, trim some whitespace after the nickname
     - Make MegaHAL.pm and irchal-seed use the same regex to identify lines
       where the bot is addressed
     - irchal-seed: Remove Encode code in favor of irc_to_utf8 from pocoirc
