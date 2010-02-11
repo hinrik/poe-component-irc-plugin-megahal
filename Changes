@@ -1,4 +1,4 @@
-0.32
+0.32  Thu Feb 11 21:03:30 GMT 2010
     - When we're addressed, trim some whitespace after the nickname
     - Make MegaHAL.pm and irchal-seed use the same regex to identify lines
       where the bot is addressed
