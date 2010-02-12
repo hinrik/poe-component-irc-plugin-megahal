@@ -1,4 +1,4 @@
-0.33
+0.33  Fri Feb 12 00:07:24 GMT 2010
     - Print a warning if POE catches an exception in our code
     - Wait for MegaHAL to save the brain before we quit
 
