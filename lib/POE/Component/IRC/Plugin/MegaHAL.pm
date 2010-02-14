@@ -320,10 +320,10 @@ It will talk back when addressed by channel members (and possibly in other
 situations, see L<C<new>|/"new">). An example:
 
  --> megahal_bot joins #channel
- <Someone> oh hi
+ <Someone> oh hi there
  <Other> hello there
- <Someone> megahal_bot: hi there
- <megahal_bot> oh hi
+ <Someone> megahal_bot: hi
+ <megahal_bot> oh hi there
 
 All NOTICEs are ignored, so if your other bots only issue NOTICEs like
 they should, they will be ignored automatically.
