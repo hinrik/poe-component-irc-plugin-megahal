@@ -1,3 +1,6 @@
+0.35
+    - Add META.yml to MANIFEST
+
 0.34  Sun Feb 14 18:50:45 GMT 2010
     - Don't ignore abusers, just don't reply to them
 
