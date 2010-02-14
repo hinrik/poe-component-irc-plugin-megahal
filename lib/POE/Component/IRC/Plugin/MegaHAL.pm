@@ -368,8 +368,8 @@ to none.
 
 B<'Abuse_interval'>, default is 60 (seconds), which means that user X in
 channel Y has to wait that long before addressing the bot in the same channel
-if he doesn't want to be ignored. Setting this to 0 effectively turns off
-abuse protection.
+if he wants to get a reply. Setting this to 0 effectively turns off abuse
+protection.
 
 B<'Talkative'>, when set to a true value, the bot will respond whenever
 someone mentions its name (in a PRIVMSG or CTCP ACTION (/me)). If false, it
