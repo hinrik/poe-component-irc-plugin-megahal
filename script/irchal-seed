@@ -29,6 +29,7 @@ else {
     die "No log format specified with --format\n";
 }
 
+binmode STDIN, ':bytes';
 binmode STDOUT, ':utf8';
 LINE: while (my $line = <STDIN>) {
     chomp $line;
