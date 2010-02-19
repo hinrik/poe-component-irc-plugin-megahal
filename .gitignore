@@ -5,3 +5,5 @@ t/megahal.dic
 t/megahal.brn
 blib
 pm_to_blib
+inc
+META.yml
