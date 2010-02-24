@@ -18,8 +18,8 @@ GetOptions(
 
 my ($privmsg, $action);
 if ($format eq 'pocoirc') {
-    $privmsg = qr/^\S+ \S+ <(\S+)> (.*)/;
-    $action = qr/^\S+ \S+ \* (.*)/;
+    $privmsg = qr/^(?:\S+ )?\S+ <(\S+)> (.*)/;
+    $action = qr/^(?:\S+ )?\S+ \* (.*)/;
 }
 elsif ($format eq 'irssi') {
     $privmsg = qr/^\S+\s+<.(\S+)> (.*)/;

@@ -1,5 +1,6 @@
 0.37
     - Always decode bytes before we use them
+    - Fix parsing of pocoirc logs without date stamps
 
 0.36  Fri Feb 19 00:01:26 GMT 2010
     - Read IRC lines as :bytes by default in irchal-seed. This
