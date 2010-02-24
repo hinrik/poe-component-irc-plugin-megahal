@@ -34,8 +34,8 @@ binmode STDOUT, ':utf8';
 LINE: while (my $line = <STDIN>) {
     chomp $line;
 
-    # irssi's encoding might be inconsistent, convert everything to UTF-8
-    $line = irc_to_utf8($line) if $format eq 'irssi';
+    # decode cp1252/utf8 bytes to a text string
+    $line = irc_to_utf8($line);
 
     $line = strip_color($line);
     $line = strip_formatting($line);

@@ -1,3 +1,6 @@
+0.37
+    - Always decode bytes before we use them
+
 0.36  Fri Feb 19 00:01:26 GMT 2010
     - Read IRC lines as :bytes by default in irchal-seed. This
       avoids issues where PERL_UNICODE or the -C option is set to
