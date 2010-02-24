@@ -1,4 +1,4 @@
-0.37
+0.37  Wed Feb 24 02:39:35 GMT 2010
     - Always decode bytes before we use them
     - Fix parsing of pocoirc logs without date stamps
 
