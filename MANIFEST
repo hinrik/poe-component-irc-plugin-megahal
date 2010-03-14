@@ -10,7 +10,6 @@ t/02_load.t
 t/megahal.trn
 xt/99_pod.t
 inc/Module/Install.pm
-inc/Module/Install/AuthorTests.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm

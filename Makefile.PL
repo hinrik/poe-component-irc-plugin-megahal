@@ -3,6 +3,10 @@ use warnings;
 use inc::Module::Install;
 use 5.006;
 
+if ($inc::Module::Install::VERSION lt '0.94') {
+    die 'Module::Install is too old';
+}
+
 name           ('POE-Component-IRC-Plugin-MegaHAL');
 perl_version   ('5.006');
 author         ('Hinrik Örn Sigurðsson <hinrik.sig@gmail.com>');
@@ -17,5 +21,4 @@ requires       ('POE::Component::IRC'         => '6.20');
 test_requires  ('Test::More'                  => '0');
 test_requires  ('Test::Script'                => '0');
 tests_recursive();
-author_tests   ('xt');
 WriteAll();
