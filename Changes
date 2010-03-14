@@ -1,4 +1,4 @@
-0.38
+0.38  Sun Mar 14 10:17:48 GMT 2010
     - Prevent double encoding of non-ASCII channel names
     - Support non-ASCII 'Own_channel' parameter
 
