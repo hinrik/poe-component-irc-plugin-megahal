@@ -3,7 +3,7 @@ package POE::Component::IRC::Plugin::MegaHAL;
 use strict;
 use warnings;
 use Carp;
-use Encode qw(decode);
+use Encode qw(decode_utf8 encode_utf8);
 use POE;
 use POE::Component::AI::MegaHAL;
 use POE::Component::IRC::Common qw(l_irc matches_mask_array irc_to_utf8 strip_color strip_formatting);
@@ -99,6 +99,7 @@ sub _sig_DIE {
 sub _megahal_reply {
     my ($self, $info) = @_[OBJECT, ARG0];
     my $reply = $self->_normalize_megahal($info->{reply});
+    $reply = encode_utf8($reply);
     
     $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
     return;
@@ -108,6 +109,7 @@ sub _megahal_greeting {
     my ($self, $info) = @_[OBJECT, ARG0];
     my $reply = $self->_normalize_megahal($info->{reply});
     $reply = "$info->{_nick}: $reply";
+    $reply = encode_utf8($reply);
     
     $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
     return;
@@ -200,7 +202,7 @@ sub _greet_handler {
 sub _normalize_megahal {
     my ($self, $line) = @_;
 
-    $line = decode('utf8', $line);
+    $line = decode_utf8($line);
     if ($self->{English}) {
         $line =~ s{\bi\b}{I}g;
         $line =~ s{(?<=\w)$}{.};
