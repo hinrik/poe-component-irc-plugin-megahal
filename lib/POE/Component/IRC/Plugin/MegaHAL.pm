@@ -296,7 +296,6 @@ sub S_join {
 }
 
 1;
-__END__
 
 =head1 NAME
 
