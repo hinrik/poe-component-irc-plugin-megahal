@@ -13,7 +13,14 @@ GetOptions(
     'b|bot=s'          => \my $bot,
     'r|ignore-regex=s' => \my @ignore_regexes,
     'n|ignore-nick=s'  => \my @ignore_nicks,
-    'v|version'        => sub { print "irchal-seed version $VERSION\n"; exit },
+    'v|version'        => sub {
+        no strict 'vars';
+        my $version = defined $App::Pocoirc::VERSION
+            ? $App::Pocoirc::VERSION
+            : 'dev-git';
+        print "irchal-seed version $version\n";
+        exit;
+    },
 ) or pod2usage();
 
 my ($privmsg, $action);

@@ -1,9 +1,5 @@
-Makefile
-Makefile.old
 POE-Component-IRC-Plugin-MegaHAL*
+cover_db
+.build
 t/megahal.dic
 t/megahal.brn
-blib
-pm_to_blib
-inc
-META.yml
