@@ -1,7 +1,7 @@
 package POE::Component::IRC::Plugin::MegaHAL;
 
 use strict;
-use warnings;
+use warnings FATAL => 'all';
 use Carp;
 use Encode qw(decode_utf8 encode_utf8 is_utf8);
 use POE;
