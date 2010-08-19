@@ -1,4 +1,5 @@
 {{$NEXT}}
+    - Fix erroneous dependency (s/Hailo/AI::MegaHAL/)
 
 0.39  Tue Aug 17 22:54:48 GMT 2010
     - Use Dist::Zilla
