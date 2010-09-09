@@ -1,0 +1,120 @@
+=encoding utf8
+
+=head1 NAME
+
+POE::Component::IRC::Plugin::MegaHAL - A PoCo-IRC plugin which provides access to a MegaHAL conversation simulator.
+
+=head1 SYNOPSIS
+
+To quickly get an IRC bot with this plugin up and running, you can use
+L<App::Pocoirc|App::Pocoirc>:
+
+ $ pocoirc -s irc.perl.org -j '#bots' -p MegaHAL
+
+Or use it in your code:
+
+ use POE::Component::IRC::Plugin::MegaHAL;
+ 
+ $irc->plugin_add('MegaHAL', POE::Component::IRC::Plugin::MegaHAL->new(
+     Own_channel    => '#bot_chan',
+     English        => 1,
+     Ignore_regexes => [ qr{^\s*\w+://\S+\s*$} ], # ignore URL-only lines
+ ));
+ 
+=head1 DESCRIPTION
+
+POE::Component::IRC::Plugin::MegaHAL is a
+L<POE::Component::IRC|POE::Component::IRC> plugin. It provides "intelligence"
+through the use of L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHal>.
+It will talk back when addressed by channel members (and possibly in other
+situations, see L<C<new>|/"new">). An example:
+
+ --> megahal_bot joins #channel
+ <Someone> oh hi there
+ <Other> hello there
+ <Someone> megahal_bot: hi
+ <megahal_bot> oh hi there
+
+All NOTICEs are ignored, so if your other bots only issue NOTICEs like
+they should, they will be ignored automatically.
+
+Before using, you should read the documentation for
+L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> and by extension,
+L<AI::MegaHAL|AI::MegaHAL>, so you have an idea of what to pass as the
+B<'MegaHAL_args'> parameter to L<C<new>|/"new">.
+
+This plugin requires the IRC component to be
+L<POE::Component::IRC::State|POE::Component::IRC::State> or a subclass thereof.
+
+=head1 METHODS
+
+=head2 C<new>
+
+Takes the following optional arguments:
+
+B<'MegaHAL'>, a reference to an existing
+L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> object you have
+lying around. Useful if you want to use it with multiple IRC components.
+If this argument is not provided, the plugin will construct its own object.
+
+B<'MegaHAL_args'>, a hash reference containing arguments to pass to the
+constructor of a new L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL>
+object.
+
+B<'Channels'>, an array reference of channel names. If this is provided, the
+bot will only listen/respond in the specified channels, rather than all
+channels.
+
+B<'Own_channel'>, a channel where it will reply to all messages, as well as
+greet everyone who joins. The plugin will take care of joining the channel.
+It will part from it when the plugin is removed from the pipeline. Defaults
+to none.
+
+B<'Abuse_interval'>, default is 60 (seconds), which means that user X in
+channel Y has to wait that long before addressing the bot in the same channel
+if he wants to get a reply. Setting this to 0 effectively turns off abuse
+protection.
+
+B<'Talkative'>, when set to a true value, the bot will respond whenever
+someone mentions its name (in a PRIVMSG or CTCP ACTION (/me)). If false, it
+will only respond when addressed directly with a PRIVMSG. Default is false.
+
+B<'Ignore_masks'>, an array reference of IRC masks (e.g. "purl!*@*") to
+ignore.
+
+B<'Ignore_regexes'>, an array reference of regex objects. If a message
+matches any of them, it will be ignored. Handy for ignoring messages with
+URLs in them.
+
+B<'Method'>, how you want messages to be delivered. Valid options are
+'notice' (the default) and 'privmsg'.
+
+B<'English'>, when set to a true value, some English-language corrections
+will be applied to the bot's output. Currently it will capitalizes the word
+'I' and make sure paragraphs end with '.' where appropriate. Defaults to
+false.
+
+Returns a plugin object suitable for feeding to
+L<POE::Component::IRC|POE::Component::IRC>'s plugin_add() method.
+
+=head2 C<brain>
+
+Takes no arguments. Returns the underlying
+L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> object being used
+by the plugin.
+
+=head2 C<transplant>
+
+Replaces the brain with the supplied
+L<POE::Component::AI::MegaHAL|POE::Component::AI::MegaHAL> instance. Shuts
+down the old brain if it was instantiated by the plugin itself.
+
+=head1 AUTHOR
+
+Hinrik E<Ouml>rn SigurE<eth>sson, hinrik.sig@gmail.com
+
+=head1 KUDOS
+
+Those go to Chris C<BinGOs> Williams and his friend GumbyBRAIN.
+
+=cut
