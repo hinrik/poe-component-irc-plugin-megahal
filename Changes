@@ -1,4 +1,5 @@
 {{$NEXT}}
+    - Update SYNOPSIS to reflect App-Pocoirc changes
 
 0.42  Thu Sep 9 06:29:48 GMT 2010
     - Mention App::Pocoirc in the SYNOPSIS
