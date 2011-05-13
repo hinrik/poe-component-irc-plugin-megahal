@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Getopt::Long qw(:config autohelp);
-use POE::Component::IRC::Common qw(l_irc strip_color strip_formatting irc_to_utf8);
+use IRC::Utils qw(lc_irc strip_color strip_formatting decode_irc);
 use Pod::Usage;
 
 GetOptions(
@@ -40,14 +40,14 @@ LINE: while (my $line = <STDIN>) {
     chomp $line;
 
     # decode cp1252/utf8 bytes to a text string
-    $line = irc_to_utf8($line);
+    $line = decode_irc($line);
 
     $line = strip_color($line);
     $line = strip_formatting($line);
 
     my ($nick, $msg);
     if (($nick, $msg) = $line =~ /$privmsg/) {
-        # PRIVMSG 
+        # PRIVMSG
         $msg =~ s/^\s*\Q$bot\E[:,;.!?~]?\s//i if defined $bot;
     }
     elsif (($msg) = $line =~ /$action/) {
@@ -57,10 +57,10 @@ LINE: while (my $line = <STDIN>) {
     else {
         next LINE;
     }
-    
+
     # skip it if we want to ignore this nick
     for my $bad (@ignore_nicks) {
-        next LINE if l_irc($nick) eq l_irc($bad);
+        next LINE if lc_irc($nick) eq lc_irc($bad);
     }
 
     # skip if it matches a regex
@@ -109,10 +109,10 @@ Example:
   # convert irssi log, stripping "MyBot: " prefix and ignoring lines with URLs
   cat ~/logs/\#chan.log | irchal-seed -f irssi -b MyBot -r '\w+://\w' > megahal.trn
 
-The C<--case> option controls the second parameter passed to C<l_irc>
-from L<POE::Component::IRC::Common|POE::Component::IRC::Common>. The default
-is B<'rfc1459'>. You usually don't have to change this. Consult that
-package's documentation for more information.
+The C<--case> option controls the second parameter passed to C<lc_irc>
+from L<IRC::Utils|IRC::Utils>. The default is B<'rfc1459'>. You usually
+don't have to change this. Consult that package's documentation for more
+information.
 
 =head1 AUTHOR
 

@@ -4,10 +4,10 @@ use strict;
 use warnings FATAL => 'all';
 use Carp;
 use Encode qw(decode_utf8 encode_utf8 is_utf8);
+use IRC::Utils qw(lc_irc matches_mask_array decode_irc strip_color strip_formatting);
 use List::Util qw(first);
 use POE;
 use POE::Component::AI::MegaHAL;
-use POE::Component::IRC::Common qw(l_irc matches_mask_array irc_to_utf8 strip_color strip_formatting);
 use POE::Component::IRC::Plugin qw(PCI_EAT_NONE);
 
 sub new {
@@ -99,7 +99,7 @@ sub _megahal_reply {
     my ($self, $info) = @_[OBJECT, ARG0];
     my $reply = $self->_normalize_megahal($info->{reply});
     $reply = encode_utf8($reply);
-    
+
     $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
     return;
 }
@@ -109,7 +109,7 @@ sub _megahal_greeting {
     my $reply = $self->_normalize_megahal($info->{reply});
     $reply = "$info->{_nick}: $reply";
     $reply = encode_utf8($reply);
-    
+
     $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
     return;
 }
@@ -133,7 +133,7 @@ sub _ignoring_channel {
     if ($self->{Channels}) {
         return 1 if !first {
             my $c = $chan;
-            $c = irc_to_utf8($c) if is_utf8($_);
+            $c = decode_irc($c) if is_utf8($_);
             $_ eq $c
         } @{ $self->{Channels} };
     }
@@ -142,7 +142,7 @@ sub _ignoring_channel {
 
 sub _ignoring_user {
     my ($self, $user) = @_;
-    
+
     if ($self->{Ignore_masks}) {
         my $mapping = $self->{irc}->isupport('CASEMAPPING');
         return 1 if keys %{ matches_mask_array($self->{Ignore_masks}, [$user], $mapping) };
@@ -162,7 +162,7 @@ sub _ignoring_abuser {
     return 1 if $last_time && (time - $last_time < $self->{Abuse_interval});
     return;
 }
-    
+
 sub _msg_handler {
     my ($self, $kernel, $type, $user, $chan, $what) = @_[OBJECT, KERNEL, ARG0..$#_];
     my $nick = $self->{irc}->nick_name();
@@ -201,10 +201,10 @@ sub _msg_handler {
 
 sub _is_own_channel {
     my $self = shift;
-    my $chan = l_irc(shift);
-    my $own  = l_irc($self->{Own_channel});
+    my $chan = lc_irc(shift);
+    my $own  = lc_irc($self->{Own_channel});
 
-    $chan = irc_to_utf8($chan) if is_utf8($own);
+    $chan = decode_irc($chan) if is_utf8($own);
     return 1 if $chan eq $own;
     return;
 }
@@ -238,7 +238,7 @@ sub _normalize_megahal {
 sub _normalize_irc {
     my ($line) = @_;
 
-    $line = irc_to_utf8($line);
+    $line = decode_irc($line);
     $line = strip_color($line);
     $line = strip_formatting($line);
     return $line;
@@ -251,7 +251,7 @@ sub brain {
 
 sub transplant {
     my ($self, $brain) = @_;
-    
+
     if (ref $brain ne 'POE::Component::AI::MegaHAL') {
         croak 'Argument must be a POE::Component::AI::MegaHAL instance';
     }
@@ -277,16 +277,16 @@ sub S_ctcp_action {
     my $what         = ${ $_[2] };
 
     return PCI_EAT_NONE if $chan !~ /^[#&!]/;
-    
+
     $poe_kernel->post(
         $self->{session_id},
         '_msg_handler',
         'action',
-        $user, 
+        $user,
         $chan,
         "$nick $what",
-    ); 
-    
+    );
+
     return PCI_EAT_NONE;
 }
 
