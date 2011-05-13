@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.44  Fri May 13 18:28:02 GMT 2011
     - Allow the bot to respond with a CTCP ACTION (/me)
 
 0.43  Tue Sep 28 08:53:59 GMT 2010
