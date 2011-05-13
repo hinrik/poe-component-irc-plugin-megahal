@@ -275,8 +275,9 @@ sub S_ctcp_action {
     my $nick         = (split /!/, $user)[0];
     my $chan         = ${ $_[1] }->[0];
     my $what         = ${ $_[2] };
+    my $chantypes    = join('', @{ $irc->isupport('CHANTYPES') || ['#', '&']});
 
-    return PCI_EAT_NONE if $chan !~ /^[#&!]/;
+    return PCI_EAT_NONE if $chan !~ /^[$chantypes]/;
 
     $poe_kernel->post(
         $self->{session_id},
