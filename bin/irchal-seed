@@ -24,11 +24,11 @@ GetOptions(
 my ($privmsg, $action);
 if ($format eq 'pocoirc') {
     $privmsg = qr/^(?:\S+ )?\S+ <(\S+)> (.*)/;
-    $action = qr/^(?:\S+ )?\S+ \* (.*)/;
+    $action = qr/^(?:\S+ )?\S+ \* (\S+) (.*)/;
 }
 elsif ($format eq 'irssi') {
     $privmsg = qr/^\S+\s+<.(\S+)> (.*)/;
-    $action = qr/^\S+\s+\* (.*)/;
+    $action = qr/^\S+\s+\* (\S+) (.*)/;
 }
 else {
     die "No log format specified with --format\n";
@@ -50,9 +50,9 @@ LINE: while (my $line = <STDIN>) {
         # PRIVMSG
         $msg =~ s/^\s*\Q$bot\E[:,;.!?~]?\s//i if defined $bot;
     }
-    elsif (($msg) = $line =~ /$action/) {
+    elsif (($nick, $msg) = $line =~ /$action/) {
         # ACTION
-        ($nick) = $msg =~ /^(\S+)/;
+        $msg = "\x01 $msg";
     }
     else {
         next LINE;
@@ -96,8 +96,8 @@ B<irchal-seed> <options>
 Input is accepted on STDIN, and output is delivered to STDOUT.
 
 You should use the C<--bot> option if your bot was present when the channel
-was logged as it will strip the "botname: " part from message where users
-addressed the bot.
+was logged as it will strip the I<"botname: "> part from messages where
+users addressed the bot.
 
 If your bot (or any other bot in the channel) can take commands that all
 start in a similar way, use the C<--ignore-regex> option to ignore those
@@ -106,7 +106,7 @@ prefixed with '!'.
 
 Example:
 
-  # convert irssi log, stripping "MyBot: " prefix and ignoring lines with URLs
+  # convert irssi log, ignoring "MyBot: " and lines with URLs
   cat ~/logs/\#chan.log | irchal-seed -f irssi -b MyBot -r '\w+://\w' > megahal.trn
 
 The C<--case> option controls the second parameter passed to C<lc_irc>

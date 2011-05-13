@@ -100,17 +100,27 @@ sub _megahal_reply {
     my $reply = $self->_normalize_megahal($info->{reply});
     $reply = encode_utf8($reply);
 
-    $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
+    if ($reply =~ s/^\x01 //) {
+        $self->{irc}->yield('ctcp', $info->{_target}, "ACTION $reply");
+    }
+    else {
+        $self->{irc}->yield($self->{Method}, $info->{_target}, $reply);
+    }
     return;
 }
 
 sub _megahal_greeting {
     my ($self, $info) = @_[OBJECT, ARG0];
     my $reply = $self->_normalize_megahal($info->{reply});
-    $reply = "$info->{_nick}: $reply";
     $reply = encode_utf8($reply);
 
-    $self->{irc}->yield($self->{Method} => $info->{_target}, $reply);
+    if ($reply =~ s/^\x01 //) {
+        $self->{irc}->yield('ctcp', $info->{_target}, "ACTION $reply");
+    }
+    else {
+        $reply = "$info->{_nick}: $reply";
+        $self->{irc}->yield($self->{Method}, $info->{_target}, $reply);
+    }
     return;
 }
 
@@ -272,7 +282,6 @@ sub S_isupport {
 sub S_ctcp_action {
     my ($self, $irc) = splice @_, 0, 2;
     my $user         = ${ $_[0] };
-    my $nick         = (split /!/, $user)[0];
     my $chan         = ${ $_[1] }->[0];
     my $what         = ${ $_[2] };
     my $chantypes    = join('', @{ $irc->isupport('CHANTYPES') || ['#', '&']});
@@ -285,7 +294,7 @@ sub S_ctcp_action {
         'action',
         $user,
         $chan,
-        "$nick $what",
+        "\x01 $what",
     );
 
     return PCI_EAT_NONE;
@@ -349,6 +358,9 @@ situations, see L<C<new>|/"new">). An example:
  <Other> hello there
  <Someone> megahal_bot: hi
  <megahal_bot> oh hi there
+
+It will occasionally send CTCP ACTIONS (/me) too, if the reply in question
+happens to be based on an earlier CTCP ACTION from someone.
 
 All NOTICEs are ignored, so if your other bots only issue NOTICEs like
 they should, they will be ignored automatically.

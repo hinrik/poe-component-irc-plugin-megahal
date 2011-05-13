@@ -1,4 +1,5 @@
 {{$NEXT}}
+    - Allow the bot to respond with a CTCP ACTION (/me)
 
 0.43  Tue Sep 28 08:53:59 GMT 2010
     - Update SYNOPSIS to reflect App-Pocoirc changes

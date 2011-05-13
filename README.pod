@@ -35,6 +35,9 @@ situations, see L<C<new>|/"new">). An example:
  <Someone> megahal_bot: hi
  <megahal_bot> oh hi there
 
+It will occasionally send CTCP ACTIONS (/me) too, if the reply in question
+happens to be based on an earlier CTCP ACTION from someone.
+
 All NOTICEs are ignored, so if your other bots only issue NOTICEs like
 they should, they will be ignored automatically.
 
