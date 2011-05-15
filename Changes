@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.45  Sun May 15 14:36:09 GMT 2011
     - Fix --version, it was always returning "dev-git"
 
 0.44  Fri May 13 18:28:02 GMT 2011
