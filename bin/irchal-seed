@@ -13,8 +13,9 @@ GetOptions(
     'n|ignore-nick=s'  => \my @ignore_nicks,
     'v|version'        => sub {
         no strict 'vars';
-        my $version = defined $App::Pocoirc::VERSION
-            ? $App::Pocoirc::VERSION
+        require POE::Component::IRC::Plugin::MegaHAL;
+        my $version = defined $POE::Component::IRC::Plugin::MegaHAL::VERSION
+            ? $POE::Component::IRC::Plugin::MegaHAL::VERSION
             : 'dev-git';
         print "irchal-seed version $version\n";
         exit;
