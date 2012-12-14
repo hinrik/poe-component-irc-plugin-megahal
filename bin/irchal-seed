@@ -28,7 +28,7 @@ if ($format eq 'pocoirc') {
     $action = qr/^(?:\S+ )?\S+ \* (\S+) (.*)/;
 }
 elsif ($format eq 'irssi') {
-    $privmsg = qr/^\S+\s+<.(\S+)> (.*)/;
+    $privmsg = qr/^\S+\s+<\W?(\S+)> (.*)/;
     $action = qr/^\S+\s+\* (\S+) (.*)/;
 }
 else {
